@@ -1,73 +1,67 @@
-# Minimal Template
+# Notraq
 
-This is a [React Native](https://reactnative.dev/) project built with [Expo](https://expo.dev/) and [React Native Reusables](https://reactnativereusables.com).
+Rastreador de preços de supermercado via NFC-e (cupom fiscal eletrônico).
 
-It was initialized using the following command, then the `Minimal (Nativewind)` template was selected when prompted:
+Escaneie o QR code do cupom fiscal, acompanhe a evolução de preços dos produtos e receba alertas de variação.
 
-```bash
-npx @react-native-reusables/cli@latest init
-```
+## Stack
 
-## Getting Started
+- [Expo](https://expo.dev/) 56 + [React Native](https://reactnative.dev/) 0.85
+- [Expo Router](https://expo.dev/router) (file-based routing)
+- [NativeWind](https://www.nativewind.dev/) + [Tailwind CSS](https://tailwindcss.com/) (estilização)
+- [React Native Reusables](https://reactnativereusables.com) (componentes UI — modelo shadcn)
+- [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) + [Drizzle ORM](https://orm.drizzle.team/) (banco local)
+- [expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/) (scan de QR code)
+- [react-native-gifted-charts](https://github.com/nicolestandifer/react-native-gifted-charts) (gráficos)
+- [Zustand](https://zustand-demo.pmnd.rs/) (estado global)
 
-To run the development server:
-
-```bash
-    npm run dev
-    # or
-    yarn dev
-    # or
-    pnpm dev
-    # or
-    bun dev
-```
-
-This will start the Expo Dev Server. Open the app in:
-
-- **iOS**: press `i` to launch in the iOS simulator _(Mac only)_
-- **Android**: press `a` to launch in the Android emulator
-- **Web**: press `w` to run in a browser
-
-You can also scan the QR code using the [Expo Go](https://expo.dev/go) app on your device. This project fully supports running in Expo Go for quick testing on physical devices.
-
-## Adding components
-
-You can add more reusable components using the CLI:
+## Começando
 
 ```bash
-npx react-native-reusables/cli@latest add [...components]
+# Instalar dependências
+pnpm install
+
+# Gerar nativos
+pnpm prebuild
+
+# Rodar no Android
+pnpm android
+
+# Rodar no iOS (Mac only)
+pnpm ios
+
+# Dev server (Expo Go)
+pnpm start
 ```
 
-> e.g. `npx react-native-reusables/cli@latest add input textarea`
+## Scripts
 
-If you don't specify any component names, you'll be prompted to select which components to add interactively. Use the `--all` flag to install all available components at once.
+| Comando | Descrição |
+|---------|-----------|
+| `pnpm start` | Inicia o dev server |
+| `pnpm android` | Build + run Android |
+| `pnpm ios` | Build + run iOS |
+| `pnpm web` | Dev server web |
+| `pnpm lint` | Type check + ESLint |
+| `pnpm format` | Formata com Prettier |
+| `pnpm prebuild` | Regenera pastas nativas |
+| `pnpm db:generate` | Gera migrations Drizzle |
 
-## Project Features
+## Estrutura
 
-- ⚛️ Built with [Expo Router](https://expo.dev/router)
-- 🎨 Styled with [Tailwind CSS](https://tailwindcss.com/) via [Nativewind](https://www.nativewind.dev/)
-- 📦 UI powered by [React Native Reusables](https://github.com/founded-labs/react-native-reusables)
-- 🚀 New Architecture enabled
-- 🔥 Edge to Edge enabled
-- 📱 Runs on iOS, Android, and Web
+```
+src/
+├── app/          # Rotas (Expo Router)
+├── components/   # Componentes React
+│   └── ui/       # Primitivos RNR (button, card, input...)
+├── db/           # Schema + client Drizzle
+├── services/     # Lógica de negócio (parser, analyzer)
+├── store/        # Estado global (Zustand)
+├── lib/          # Utilitários (cn, theme)
+├── types/        # TypeScript types
+└── assets/       # Imagens e recursos
+```
 
-## Learn More
+## Licença
 
-To dive deeper into the technologies used:
-
-- [React Native Docs](https://reactnative.dev/docs/getting-started)
-- [Expo Docs](https://docs.expo.dev/)
-- [Nativewind Docs](https://www.nativewind.dev/)
-- [React Native Reusables](https://reactnativereusables.com)
-
-## Deploy with EAS
-
-The easiest way to deploy your app is with [Expo Application Services (EAS)](https://expo.dev/eas).
-
-- [EAS Build](https://docs.expo.dev/build/introduction/)
-- [EAS Updates](https://docs.expo.dev/eas-update/introduction/)
-- [EAS Submit](https://docs.expo.dev/submit/introduction/)
-
----
-
-If you enjoy using React Native Reusables, please consider giving it a ⭐ on [GitHub](https://github.com/founded-labs/react-native-reusables). Your support means a lot!
+Projeto privado.
