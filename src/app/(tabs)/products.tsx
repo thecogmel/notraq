@@ -73,7 +73,7 @@ function Sparkline({ prices, direction }: { prices: number[]; direction?: 'up' |
         points={points}
         fill="none"
         stroke={strokeColor}
-        strokeWidth="1.5"
+        strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -178,7 +178,7 @@ export default function ProductsScreen() {
   return (
     <View className="flex-1 bg-background px-4 pt-14">
       {/* Title */}
-      <Text className="mb-4 text-2xl font-semibold text-white">Produtos</Text>
+      <Text className="mb-4 text-[27px] font-semibold tracking-tight text-white">Produtos</Text>
 
       {/* Search Bar */}
       <View className="mb-4 flex-row items-center gap-2.5 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
@@ -279,31 +279,29 @@ function ProductRow({ item }: { item: ProductWithPrice }) {
   const variationPrefix = direction === 'up' ? '+' : direction === 'down' ? '' : '';
 
   return (
-    <View className="flex-row items-center rounded-2xl border border-zinc-800 bg-zinc-900 p-3.5">
+    <View className="flex-row items-center gap-3 rounded-2xl border border-zinc-800 bg-[#18181b] px-3.5 py-3">
       {/* Left: Name + Unit */}
       <View className="flex-1 shrink">
         <Text className="text-sm font-semibold text-white" numberOfLines={1}>
           {item.name}
         </Text>
         {item.unit ? (
-          <Text className="mt-0.5 text-xs text-zinc-500">{item.unit}</Text>
+          <Text className="mt-0.5 text-[11.5px] text-zinc-500">{item.unit}</Text>
         ) : null}
       </View>
 
       {/* Middle: Sparkline */}
-      <View className="mx-3">
-        <Sparkline prices={item.recentPrices} direction={direction} />
-      </View>
+      <Sparkline prices={item.recentPrices} direction={direction} />
 
-      {/* Right: Price + Variation */}
-      <View className="items-end">
+      {/* Right: Price + Variation (fixed width) */}
+      <View className="w-[74px] items-end">
         <Text className="font-mono text-sm font-semibold text-white">
-          R$ {item.lastPrice.toFixed(2)}
+          R$ {item.lastPrice.toFixed(2).replace('.', ',')}
         </Text>
-        {item.priceChange ? (
-          <Text className={`mt-0.5 text-xs ${variationColor}`}>
+        {item.priceChange && direction !== 'stable' ? (
+          <Text className={`mt-0.5 text-[11.5px] font-semibold ${variationColor}`}>
             {variationPrefix}
-            {changePercent.toFixed(1)}%
+            {changePercent.toFixed(1).replace('.', ',')}%
           </Text>
         ) : null}
       </View>
