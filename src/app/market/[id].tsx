@@ -4,7 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { desc, eq, sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Pencil, Receipt, Store, X } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Pencil, Receipt, Store, Trash2, X } from 'lucide-react-native';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +37,17 @@ export default function MarketDetailScreen() {
   const [editName, setEditName] = useState('');
   const [editAddress, setEditAddress] = useState('');
   const [editCnpj, setEditCnpj] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const deleteMarket = async () => {
+    // Delete all price entries for this store
+    await db.delete(priceEntries).where(eq(priceEntries.storeId, storeId));
+    // Delete all receipts for this store
+    await db.delete(receipts).where(eq(receipts.storeId, storeId));
+    // Delete the store
+    await db.delete(stores).where(eq(stores.id, storeId));
+    router.replace('/(tabs)' as never);
+  };
 
   const loadData = useCallback(async () => {
     const [store] = await db.select().from(stores).where(eq(stores.id, storeId)).limit(1);
@@ -196,13 +207,47 @@ export default function MarketDetailScreen() {
               </Pressable>
               <Text className="text-[17px] font-semibold text-white">Mercado</Text>
             </View>
-            <Pressable
-              onPress={openEdit}
-              className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-[#18181b]"
-            >
-              <Pencil size={16} color="#a1a1aa" />
-            </Pressable>
+            <View className="flex-row items-center gap-2">
+              <Pressable
+                onPress={openEdit}
+                className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-[#18181b]"
+              >
+                <Pencil size={16} color="#a1a1aa" />
+              </Pressable>
+              <Pressable
+                onPress={() => setConfirmDelete(true)}
+                className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-[#18181b]"
+              >
+                <Trash2 size={16} color="#f87171" />
+              </Pressable>
+            </View>
           </View>
+
+          {/* Delete confirmation modal */}
+          <Modal visible={confirmDelete} transparent animationType="fade">
+            <View className="flex-1 items-center justify-center bg-black/60 px-8">
+              <View className="w-full rounded-2xl border border-zinc-800 bg-[#18181b] p-5">
+                <Text className="text-lg font-semibold text-white">Excluir mercado?</Text>
+                <Text className="mt-2 text-sm text-zinc-400">
+                  Todas as notas e registros de preço deste mercado serão removidos permanentemente.
+                </Text>
+                <View className="mt-5 flex-row gap-3">
+                  <Pressable
+                    onPress={() => setConfirmDelete(false)}
+                    className="flex-1 rounded-xl border border-zinc-700 py-3"
+                  >
+                    <Text className="text-center text-sm font-medium text-zinc-300">Cancelar</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={deleteMarket}
+                    className="flex-1 rounded-xl bg-red-500/90 py-3"
+                  >
+                    <Text className="text-center text-sm font-semibold text-white">Excluir</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </Modal>
 
           {/* Store icon + name + address + CNPJ */}
           <View className="flex-row items-center gap-3.5">

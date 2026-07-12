@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { desc, eq } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, ChevronLeft, Clock, Package, TrendingDown, TrendingUp } from 'lucide-react-native';
+import { Calendar, ChevronLeft, Clock, Package, Trash2, TrendingDown, TrendingUp } from 'lucide-react-native';
 
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
@@ -34,6 +34,13 @@ export default function ReceiptDetailScreen() {
   const [date, setDate] = useState<Date | null>(null);
   const [total, setTotal] = useState(0);
   const [items, setItems] = useState<ReceiptItem[]>([]);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
+  const deleteReceipt = async () => {
+    await db.delete(priceEntries).where(eq(priceEntries.receiptId, receiptId));
+    await db.delete(receipts).where(eq(receipts.id, receiptId));
+    router.replace('/(tabs)' as never);
+  };
 
   const loadReceipt = useCallback(async () => {
     const [receipt] = await db.select().from(receipts).where(eq(receipts.id, receiptId)).limit(1);
@@ -100,16 +107,50 @@ export default function ReceiptDetailScreen() {
   return (
     <ScrollView className="flex-1 bg-[#09090b]">
       <View className="px-4 pb-8 pt-14">
-        {/* Header: back + title */}
-        <View className="flex-row items-center gap-2.5 pb-4">
+        {/* Header: back + title + delete */}
+        <View className="flex-row items-center justify-between pb-4">
+          <View className="flex-row items-center gap-2.5">
+            <Pressable
+              onPress={() => router.back()}
+              className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-[#18181b]"
+            >
+              <ChevronLeft size={20} color="#e4e4e7" />
+            </Pressable>
+            <Text className="text-[17px] font-semibold text-white">Nota fiscal</Text>
+          </View>
           <Pressable
-            onPress={() => router.back()}
+            onPress={() => setConfirmDelete(true)}
             className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-[#18181b]"
           >
-            <ChevronLeft size={20} color="#e4e4e7" />
+            <Trash2 size={16} color="#f87171" />
           </Pressable>
-          <Text className="text-[17px] font-semibold text-white">Nota fiscal</Text>
         </View>
+
+        {/* Delete confirmation modal */}
+        <Modal visible={confirmDelete} transparent animationType="fade">
+          <View className="flex-1 items-center justify-center bg-black/60 px-8">
+            <View className="w-full rounded-2xl border border-zinc-800 bg-[#18181b] p-5">
+              <Text className="text-lg font-semibold text-white">Excluir nota?</Text>
+              <Text className="mt-2 text-sm text-zinc-400">
+                Todos os registros de preço desta compra serão removidos. Esta ação não pode ser desfeita.
+              </Text>
+              <View className="mt-5 flex-row gap-3">
+                <Pressable
+                  onPress={() => setConfirmDelete(false)}
+                  className="flex-1 rounded-xl border border-zinc-700 py-3"
+                >
+                  <Text className="text-center text-sm font-medium text-zinc-300">Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  onPress={deleteReceipt}
+                  className="flex-1 rounded-xl bg-red-500/90 py-3"
+                >
+                  <Text className="text-center text-sm font-semibold text-white">Excluir</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         {/* Store avatar + name + address */}
         <View className="flex-row items-center gap-3.5 px-1">
