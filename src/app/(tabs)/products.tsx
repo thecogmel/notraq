@@ -181,14 +181,14 @@ export default function ProductsScreen() {
       <Text className="mb-4 text-2xl font-semibold text-white">Produtos</Text>
 
       {/* Search Bar */}
-      <View className="mb-3 flex-row items-center rounded-[14px] border border-zinc-800 bg-zinc-900 p-3">
+      <View className="mb-4 flex-row items-center gap-2.5 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
         <Search size={18} color="#71717a" />
         <TextInput
           value={search}
           onChangeText={setSearch}
           placeholder="Buscar produto…"
-          placeholderTextColor="#71717a"
-          className="ml-2 flex-1 text-sm text-white"
+          placeholderTextColor="#52525b"
+          className="flex-1 text-sm text-white"
           autoCapitalize="none"
           autoCorrect={false}
         />
@@ -198,8 +198,8 @@ export default function ProductsScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="mb-3 max-h-9"
-        contentContainerClassName="gap-2"
+        className="mb-2.5 -mx-4 grow-0"
+        contentContainerClassName="gap-2 px-4"
       >
         {FILTERS.map((f) => {
           const active = filter === f.key;
@@ -207,14 +207,14 @@ export default function ProductsScreen() {
             <Pressable
               key={f.key}
               onPress={() => setFilter(f.key)}
-              className={`rounded-full border px-3.5 py-1.5 ${
+              className={`self-start rounded-full border px-3.5 py-[7px] ${
                 active
                   ? 'border-transparent bg-price-down'
-                  : 'border-zinc-800 bg-zinc-900'
+                  : 'border-zinc-800 bg-[#18181b]'
               }`}
             >
               <Text
-                className={`text-xs font-medium ${
+                className={`text-[13px] font-medium ${
                   active ? 'text-zinc-950' : 'text-zinc-400'
                 }`}
               >
