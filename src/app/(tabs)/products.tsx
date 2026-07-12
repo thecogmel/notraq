@@ -1,15 +1,14 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useFocusEffect, router } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { desc, eq } from 'drizzle-orm';
 import { Search } from 'lucide-react-native';
-import Svg, { Polyline } from 'react-native-svg';
 
 import { EmptyState } from '@/components/EmptyState';
+import { ProductRow } from '@/components/ProductRow';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { priceEntries, products } from '@/db/schema';
-import { formatBRL } from '@/lib/utils';
 import { calculatePriceChange } from '@/services/price-analyzer';
 import type { PriceChange } from '@/types';
 
@@ -44,43 +43,6 @@ const SORTS: { key: SortOption; label: string }[] = [
 
 // --- Sparkline Component ---
 
-function Sparkline({ prices, direction }: { prices: number[]; direction?: 'up' | 'down' | 'stable' }) {
-  if (prices.length < 2) return <View className="h-[22px] w-[56px]" />;
-
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const range = max - min || 1;
-
-  const w = 56;
-  const h = 22;
-  const padding = 2;
-  const innerW = w - padding * 2;
-  const innerH = h - padding * 2;
-
-  const points = prices
-    .map((price, i) => {
-      const x = padding + (i / (prices.length - 1)) * innerW;
-      const y = padding + innerH - ((price - min) / range) * innerH;
-      return `${x},${y}`;
-    })
-    .join(' ');
-
-  const strokeColor =
-    direction === 'up' ? '#f87171' : direction === 'down' ? '#34d399' : '#71717a';
-
-  return (
-    <Svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-      <Polyline
-        points={points}
-        fill="none"
-        stroke={strokeColor}
-        strokeWidth="1.8"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </Svg>
-  );
-}
 
 // --- Main Screen ---
 
@@ -267,49 +229,3 @@ export default function ProductsScreen() {
 }
 
 // --- Product Row Component ---
-
-function ProductRow({ item }: { item: ProductWithPrice }) {
-  const direction = item.priceChange?.direction;
-  const changePercent = item.priceChange?.changePercent ?? 0;
-
-  const variationColor =
-    direction === 'up'
-      ? 'text-price-up'
-      : direction === 'down'
-        ? 'text-price-down'
-        : 'text-zinc-500';
-
-  const variationPrefix = direction === 'up' ? '+' : direction === 'down' ? '' : '';
-
-  return (
-    <Pressable onPress={() => router.push(`/product/${item.id}` as never)}>
-      <View className="flex-row items-center gap-3 rounded-2xl border border-zinc-800 bg-[#18181b] px-3.5 py-3">
-        {/* Left: Name + Unit */}
-        <View className="flex-1 shrink">
-          <Text className="text-sm font-semibold text-white" numberOfLines={1}>
-            {item.name}
-          </Text>
-          {item.unit ? (
-            <Text className="mt-0.5 text-[11.5px] text-zinc-500">{item.unit}</Text>
-          ) : null}
-        </View>
-
-        {/* Middle: Sparkline */}
-        <Sparkline prices={item.recentPrices} direction={direction} />
-
-        {/* Right: Price + Variation (fixed width) */}
-        <View className="w-[74px] items-end">
-          <Text className="font-mono text-sm font-semibold text-white">
-            {formatBRL(item.lastPrice)}
-          </Text>
-          {item.priceChange && direction !== 'stable' ? (
-            <Text className={`mt-0.5 text-[11.5px] font-semibold ${variationColor}`}>
-              {variationPrefix}
-              {changePercent.toFixed(1).replace('.', ',')}%
-            </Text>
-          ) : null}
-        </View>
-      </View>
-    </Pressable>
-  );
-}
