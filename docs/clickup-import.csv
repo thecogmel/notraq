@@ -1,0 +1,24 @@
+Task Name,Status,Priority,Tags
+Criar schema Drizzle (stores / products / receipts / priceEntries),to do,High,banco-de-dados
+Criar client DB + provider + migrations,to do,High,banco-de-dados
+Gerar migration inicial,to do,High,banco-de-dados
+Definir types compartilhados (NfceItem / NfceReceipt / PriceChange),to do,Normal,parser-nfce
+Criar parser NFC-e (fetch + regex extraction),to do,High,parser-nfce
+Criar serviço de ingestão de notas (upsert store/product/price),to do,High,parser-nfce
+Criar analisador de preços (variação % / direção),to do,Normal,analise
+Criar Zustand store (isProcessing / lastError),to do,Low,telas
+Criar ScannerView (câmera + permissão),to do,High,telas
+Criar ManualEntryForm,to do,Normal,telas
+Criar tela Scan com toggle QR/Manual,to do,High,telas
+Criar PriceChangeAlert (badge ↑/↓),to do,Low,telas
+Criar ProductCard,to do,Normal,telas
+Criar EmptyState,to do,Low,telas
+Criar tela lista de produtos (home real),to do,High,telas
+Criar PriceChart (LineChart gifted-charts),to do,Normal,telas
+Criar tela detalhe do produto,to do,High,telas
+Criar Tab layout (Produtos / Escanear / Mercados),to do,High,telas
+Criar tela de Mercados,to do,Normal,telas
+Criar tela Detalhe da Nota,to do,Normal,telas
+Atualizar app.json (plugin camera / permissão pt-BR),to do,Normal,config-final
+Atualizar root layout (migrations na inicialização),to do,High,config-final
+Teste completo do fluxo E2E,to do,High,config-final
