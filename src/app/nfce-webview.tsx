@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Download } from 'lucide-react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
@@ -38,7 +38,7 @@ export default function NfceWebViewScreen() {
 
       if (!parsed.success) {
         setExtracting(false);
-        Alert.alert('Extração falhou', parsed.error || 'Não foi possível ler os dados da nota.');
+        setError(parsed.error || 'Não foi possível ler os dados da nota.');
         return;
       }
 
@@ -46,19 +46,15 @@ export default function NfceWebViewScreen() {
 
       if (receipt.items.length === 0) {
         setExtracting(false);
-        Alert.alert(
-          'Nenhum item encontrado',
-          'Verifique se a página da nota carregou completamente e tente novamente.'
-        );
+        setError('Nenhum item encontrado. Verifique se a nota carregou completamente e tente novamente.');
         return;
       }
 
       const receiptId = await ingestReceipt(receipt);
-      Alert.alert('Sucesso!', `${receipt.items.length} itens importados de ${receipt.storeName}.`);
       router.replace(`/receipt/${receiptId}` as never);
     } catch (e) {
       setExtracting(false);
-      Alert.alert('Erro', 'Falha ao processar dados da nota.');
+      setError('Falha ao processar dados da nota.');
     }
   };
 
@@ -114,8 +110,11 @@ export default function NfceWebViewScreen() {
       {error && (
         <View className="flex-1 items-center justify-center px-6">
           <Text className="text-center text-sm text-zinc-400">{error}</Text>
-          <Pressable onPress={() => router.back()} className="mt-4 rounded-xl bg-zinc-800 px-5 py-3">
-            <Text className="text-sm text-white">Voltar</Text>
+          <Pressable
+            onPress={() => { setError(null); setExtracting(false); }}
+            className="mt-4 rounded-xl bg-zinc-800 px-5 py-3"
+          >
+            <Text className="text-sm text-white">Tentar novamente</Text>
           </Pressable>
         </View>
       )}

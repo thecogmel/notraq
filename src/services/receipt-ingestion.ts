@@ -34,19 +34,36 @@ export async function ingestReceipt(data: NfceReceipt): Promise<number> {
 }
 
 async function upsertStore(name: string, cnpj: string, address: string): Promise<number> {
+  // Clean store name (remove "RAZÃO SOCIAL:" prefix etc)
+  const cleanName = name
+    .replace(/^(?:RAZ[ÃA]O\s*SOCIAL|EMPRESA|EMITENTE)[:\s]*/i, '')
+    .trim() || name.trim();
+
   // Match by CNPJ first (most reliable)
   if (cnpj) {
     const [existing] = await db.select().from(stores).where(eq(stores.cnpj, cnpj)).limit(1);
-    if (existing) return existing.id;
+    if (existing) {
+      // Update name if it still has the prefix
+      if (existing.name !== cleanName && existing.name.match(/RAZ[ÃA]O\s*SOCIAL/i)) {
+        await db.update(stores).set({ name: cleanName, address: address || existing.address }).where(eq(stores.id, existing.id));
+      }
+      return existing.id;
+    }
   }
 
   // Match by exact name (case-insensitive via UPPER)
-  const normalized = name.toUpperCase().trim();
+  const normalized = cleanName.toUpperCase();
   const allStores = await db.select().from(stores);
   const match = allStores.find((s) => s.name.toUpperCase().trim() === normalized);
-  if (match) return match.id;
+  if (match) {
+    // Update name if it still has the prefix
+    if (match.name.match(/RAZ[ÃA]O\s*SOCIAL/i)) {
+      await db.update(stores).set({ name: cleanName }).where(eq(stores.id, match.id));
+    }
+    return match.id;
+  }
 
-  const [store] = await db.insert(stores).values({ name, cnpj, address }).returning();
+  const [store] = await db.insert(stores).values({ name: cleanName, cnpj, address }).returning();
   return store.id;
 }
 
