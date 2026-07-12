@@ -21,7 +21,7 @@ export default function TabLayout() {
           }),
         },
         tabBarLabelStyle: {
-          fontSize: 10,
+          fontSize: 11,
           fontFamily: 'Capriola_400Regular',
         },
         headerShown: false,
