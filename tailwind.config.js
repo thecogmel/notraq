@@ -41,6 +41,15 @@ module.exports = {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
+        // Custom semantic colors
+        'price-up': '#f87171',
+        'price-down': '#34d399',
+        'price-alert': '#fb923c',
+        'surface': '#18181b',
+        'surface-border': '#27272a',
+        'text-primary': '#fafafa',
+        'text-secondary': '#71717a',
+        'text-tertiary': '#52525b',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -49,6 +58,9 @@ module.exports = {
       },
       borderWidth: {
         hairline: hairlineWidth(),
+      },
+      fontFamily: {
+        mono: ['ui-monospace', 'monospace'],
       },
       keyframes: {
         'accordion-down': {

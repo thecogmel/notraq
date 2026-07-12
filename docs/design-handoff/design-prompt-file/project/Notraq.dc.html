@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  body{margin:0;background:#050506;font-family:'Geist',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+  a{color:#34d399;text-decoration:none}
+  a:hover{color:#6ee7b7}
+  ::-webkit-scrollbar{width:0;height:0}
+  @keyframes nq-spin{to{transform:rotate(360deg)}}
+  @keyframes nq-scan{0%{top:12%}50%{top:82%}100%{top:12%}}
+  @keyframes nq-pulse{0%,100%{opacity:.5}50%{opacity:1}}
+  @keyframes nq-bar{0%{transform:scaleX(0)}100%{transform:scaleX(1)}}
+</style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:34px;background:radial-gradient(130% 120% at 50% -10%, #16161b 0%, #050506 58%)">
+  <div style="width:417px;height:876px;background:#000;border-radius:60px;padding:12px;box-shadow:0 50px 120px rgba(0,0,0,.75), 0 0 0 2px #1d1d22, inset 0 0 0 2px #0b0b0c">
+    <div style="position:relative;width:393px;height:852px;background:#09090b;border-radius:48px;overflow:hidden">
+
+      <!-- dynamic island + status bar -->
+      <div style="position:absolute;top:11px;left:50%;transform:translateX(-50%);width:120px;height:33px;background:#000;border-radius:20px;z-index:40"></div>
+      <div style="position:absolute;top:0;left:0;right:0;height:54px;z-index:39;display:flex;align-items:center;justify-content:space-between;padding:0 28px 0 30px;pointer-events:none">
+        <div style="font:600 15px 'Geist';color:#fafafa;letter-spacing:.02em">21:04</div>
+        <div style="display:flex;gap:7px;align-items:center;color:#fafafa">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="2.5" width="3" height="9.5" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg width="17" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><path d="M12 20h.01"/></svg>
+          <svg width="26" height="13" viewBox="0 0 26 13" fill="none"><rect x="1" y="1" width="21" height="11" rx="3" stroke="currentColor" stroke-opacity=".45" stroke-width="1.2"/><rect x="3" y="3" width="15.5" height="7" rx="1.5" fill="currentColor"/><rect x="23.5" y="4.5" width="1.6" height="4" rx=".8" fill="currentColor" fill-opacity=".55"/></svg>
+        </div>
+      </div>
+
+      <!-- ============ TAB SCREENS (scrollable) ============ -->
+      <div style="position:absolute;inset:0;overflow-y:auto;padding:60px 0 108px">
+
+        <!-- HOME -->
+        <sc-if value="{{ scr.home }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:0 20px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:6px 0 22px">
+            <div style="min-width:0">
+              <div style="font:500 14px 'Geist';color:#71717a">Boa noite,</div>
+              <div style="font:600 27px 'Geist';color:#fafafa;letter-spacing:-.025em;margin-top:2px">{{ userName }}</div>
+            </div>
+            <div onClick="{{ nav.scanner }}" style="flex:none;margin-top:4px;width:50px;height:50px;border-radius:17px;background:linear-gradient(160deg,{{ accentHi }},{{ accent }});display:flex;align-items:center;justify-content:center;box-shadow:0 8px 20px {{ accentShadow }};cursor:pointer">
+              <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#1c1206" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px">
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:16px;padding:13px 12px 12px">
+              <div style="font:600 25px 'Geist Mono';color:#fafafa;letter-spacing:-.03em">42</div>
+              <div style="font:500 11px 'Geist';color:#71717a;margin-top:3px">Produtos</div>
+            </div>
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:16px;padding:13px 12px 12px">
+              <div style="font:600 25px 'Geist Mono';color:#fafafa;letter-spacing:-.03em">4</div>
+              <div style="font:500 11px 'Geist';color:#71717a;margin-top:3px">Mercados</div>
+            </div>
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:16px;padding:13px 12px 12px">
+              <div style="font:600 25px 'Geist Mono';color:#fafafa;letter-spacing:-.03em">22</div>
+              <div style="font:500 11px 'Geist';color:#71717a;margin-top:3px">Notas</div>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:28px 2px 13px">
+            <div style="font:600 16px 'Geist';color:#fafafa;letter-spacing:-.01em">Alertas recentes</div>
+            <div style="font:500 12.5px 'Geist';color:{{ accent }}">Ver todos</div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="4">
+              <div onClick="{{ a.open }}" style="display:flex;align-items:center;gap:13px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:13px 14px;cursor:pointer">
+                <div style="flex:none;width:42px;height:42px;border-radius:13px;background:{{ a.tintBg }};display:flex;align-items:center;justify-content:center;color:{{ a.color }}">
+                  <sc-if value="{{ a.up }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></sc-if>
+                  <sc-if value="{{ a.down }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/></svg></sc-if>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 14px 'Geist';color:#fafafa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ a.name }}</div>
+                  <div style="font:400 12px 'Geist';color:#71717a;margin-top:2px">{{ a.note }}</div>
+                </div>
+                <div style="flex:none;text-align:right">
+                  <div style="font:600 14.5px 'Geist';color:{{ a.color }};letter-spacing:-.01em">{{ a.varStr }}</div>
+                  <div style="font:500 11px 'Geist';color:#52525b;margin-top:1px">{{ a.lastStr }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;margin:26px 2px 13px">
+            <div style="font:600 16px 'Geist';color:#fafafa;letter-spacing:-.01em">Últimas compras</div>
+          </div>
+          <div style="background:#18181b;border:1px solid #27272a;border-radius:16px;padding:2px 14px">
+            <sc-for list="{{ recent }}" as="r" hint-placeholder-count="4">
+              <div onClick="{{ r.open }}" style="display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid {{ r.divider }};cursor:pointer">
+                <div style="flex:none;width:40px;height:40px;border-radius:12px;background:{{ r.tintBg }};display:flex;align-items:center;justify-content:center;font:600 15px 'Geist';color:{{ r.color }}">{{ r.initial }}</div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 14px 'Geist';color:#fafafa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.store }}</div>
+                  <div style="font:400 12px 'Geist';color:#71717a;margin-top:2px">{{ r.meta }}</div>
+                </div>
+                <div style="flex:none;display:flex;align-items:center;gap:6px">
+                  <div style="font:600 14px 'Geist Mono';color:#e4e4e7;letter-spacing:-.02em">{{ r.totalStr }}</div>
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- PRODUTOS -->
+        <sc-if value="{{ scr.produtos }}">
+        <div style="padding:0 20px">
+          <div style="font:600 27px 'Geist';color:#fafafa;letter-spacing:-.025em;padding:6px 0 16px">Produtos</div>
+          <div style="display:flex;align-items:center;gap:9px;background:#18181b;border:1px solid #27272a;border-radius:14px;padding:11px 13px">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#71717a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+            <div style="font:400 14px 'Geist';color:#52525b">Buscar produto…</div>
+          </div>
+          <div style="display:flex;gap:8px;margin:15px 0 10px;overflow-x:auto">
+            <sc-for list="{{ filters }}" as="f" hint-placeholder-count="4">
+              <div onClick="{{ f.onClick }}" style="flex:none;font:500 13px 'Geist';padding:7px 14px;border-radius:999px;cursor:pointer;background:{{ f.bg }};color:{{ f.fg }};border:1px solid {{ f.border }}">{{ f.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;margin:0 2px 12px">
+            <span style="font:400 12px 'Geist';color:#52525b">Ordenar:</span>
+            <sc-for list="{{ sorts }}" as="s" hint-placeholder-count="3">
+              <div onClick="{{ s.onClick }}" style="font:500 12px 'Geist';cursor:pointer;color:{{ s.fg }}">{{ s.label }}</div>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <sc-for list="{{ produtos }}" as="p" hint-placeholder-count="8">
+              <div onClick="{{ p.open }}" style="display:flex;align-items:center;gap:13px;background:#18181b;border:1px solid #27272a;border-radius:16px;padding:13px 14px;cursor:pointer">
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 14px 'Geist';color:#fafafa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.name }}</div>
+                  <div style="font:400 11.5px 'Geist';color:#71717a;margin-top:2px">{{ p.unit }}</div>
+                </div>
+                <svg viewBox="0 0 60 22" style="flex:none;width:56px;height:22px"><polyline points="{{ p.spark }}" fill="none" stroke="{{ p.color }}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div style="flex:none;text-align:right;width:74px">
+                  <div style="font:600 14px 'Geist Mono';color:#fafafa;letter-spacing:-.02em">{{ p.lastStr }}</div>
+                  <div style="font:600 11.5px 'Geist';color:{{ p.color }};margin-top:2px">{{ p.varStr }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+        <!-- MERCADOS -->
+        <sc-if value="{{ scr.mercados }}">
+        <div style="padding:0 20px">
+          <div style="font:600 27px 'Geist';color:#fafafa;letter-spacing:-.025em;padding:6px 0 16px">Mercados</div>
+          <div style="display:flex;flex-direction:column;gap:11px">
+            <sc-for list="{{ mercados }}" as="m" hint-placeholder-count="4">
+              <div onClick="{{ m.open }}" style="display:flex;align-items:center;gap:14px;background:#18181b;border:1px solid #27272a;border-radius:18px;padding:16px 15px;cursor:pointer">
+                <div style="flex:none;width:48px;height:48px;border-radius:14px;background:{{ m.tintBg }};display:flex;align-items:center;justify-content:center;color:{{ m.color }}">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.4-4.4A2 2 0 0 1 7.8 2h8.3a2 2 0 0 1 1.5.6L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M2 7h20"/></svg>
+                </div>
+                <div style="flex:1;min-width:0">
+                  <div style="font:600 15px 'Geist';color:#fafafa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ m.name }}</div>
+                  <div style="font:400 12px 'Geist';color:#71717a;margin-top:3px;display:flex;align-items:center;gap:5px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>{{ m.short }}</div>
+                </div>
+                <div style="flex:none;text-align:right">
+                  <div style="font:600 12px 'Geist';color:#e4e4e7">{{ m.notas }} notas</div>
+                  <div style="font:500 11px 'Geist';color:#52525b;margin-top:2px">{{ m.gastoStr }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+        </sc-if>
+
+      </div>
+
+      <!-- ============ SCANNER (full cover) ============ -->
+      <sc-if value="{{ scr.scanner }}">
+      <div style="position:absolute;inset:0;z-index:20;background:#0a0a0b;overflow:hidden">
+        <div style="position:absolute;inset:0;background:radial-gradient(80% 50% at 50% 42%, #1c1c22 0%, #0a0a0b 72%)"></div>
+        <sc-if value="{{ scan.cam }}">
+          <div onClick="{{ onScan }}" style="position:absolute;inset:0;cursor:pointer">
+            <div style="position:absolute;top:44%;left:50%;transform:translate(-50%,-50%);width:236px;height:236px">
+              <div style="position:absolute;inset:0;border-radius:26px;box-shadow:0 0 0 2000px rgba(6,6,8,.55)"></div>
+              <span style="position:absolute;top:-2px;left:-2px;width:40px;height:40px;border-top:3px solid #34d399;border-left:3px solid #34d399;border-radius:14px 0 0 0"></span>
+              <span style="position:absolute;top:-2px;right:-2px;width:40px;height:40px;border-top:3px solid #34d399;border-right:3px solid #34d399;border-radius:0 14px 0 0"></span>
+              <span style="position:absolute;bottom:-2px;left:-2px;width:40px;height:40px;border-bottom:3px solid #34d399;border-left:3px solid #34d399;border-radius:0 0 0 14px"></span>
+              <span style="position:absolute;bottom:-2px;right:-2px;width:40px;height:40px;border-bottom:3px solid #34d399;border-right:3px solid #34d399;border-radius:0 0 14px 0"></span>
+              <div style="position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,#34d399,transparent);box-shadow:0 0 12px #34d399;animation:nq-scan 2.4s ease-in-out infinite"></div>
+            </div>
+            <div style="position:absolute;left:0;right:0;bottom:130px;text-align:center;padding:0 40px">
+              <div style="font:600 17px 'Geist';color:#fafafa">Aponte para o QR code</div>
+              <div style="font:400 13.5px 'Geist';color:#a1a1aa;margin-top:6px;line-height:1.4">Enquadre o código no verso da<br>nota fiscal (NFC-e)</div>
+              <div style="display:inline-flex;align-items:center;gap:7px;margin-top:16px;font:500 12px 'Geist';color:#34d399;animation:nq-pulse 1.6s ease-in-out infinite"><span style="width:7px;height:7px;border-radius:50%;background:#34d399;display:inline-block"></span>Toque para simular a leitura</div>
+            </div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ scan.loading }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px">
+            <div style="width:62px;height:62px;border-radius:50%;border:4px solid #1f1f24;border-top-color:#34d399;animation:nq-spin .9s linear infinite"></div>
+            <div style="text-align:center"><div style="font:600 16px 'Geist';color:#fafafa">Lendo nota fiscal…</div><div style="font:400 13px 'Geist';color:#a1a1aa;margin-top:5px">Buscando itens na SEFAZ</div></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ scan.success }}">
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding:96px 26px 30px">
+            <div style="width:74px;height:74px;border-radius:50%;background:rgba(52,211,153,.14);display:flex;align-items:center;justify-content:center">
+              <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(160deg,#34d399,#10b981);display:flex;align-items:center;justify-content:center"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#052e1f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></div>
+            </div>
+            <div style="font:600 19px 'Geist';color:#fafafa;margin-top:20px">Nota registrada!</div>
+            <div style="font:400 13px 'Geist';color:#a1a1aa;margin-top:5px">6 itens adicionados ao histórico</div>
+            <div style="width:100%;background:#18181b;border:1px solid #27272a;border-radius:18px;padding:18px;margin-top:26px">
+              <div style="display:flex;align-items:center;gap:12px;padding-bottom:15px;border-bottom:1px solid #27272a">
+                <div style="width:44px;height:44px;border-radius:13px;background:rgba(245,158,11,.14);display:flex;align-items:center;justify-content:center;font:600 16px 'Geist';color:#f59e0b">A</div>
+                <div><div style="font:600 15px 'Geist';color:#fafafa">Assaí Atacadista</div><div style="font:400 12px 'Geist';color:#71717a;margin-top:2px">06 Jul 2025 · 18:42</div></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;margin-top:15px">
+                <div><div style="font:400 11px 'Geist';color:#71717a">Total da compra</div><div style="font:600 24px 'Geist Mono';color:#fafafa;margin-top:2px;letter-spacing:-.02em">R$ 188,32</div></div>
+                <div style="text-align:right"><div style="font:400 11px 'Geist';color:#71717a">Itens</div><div style="font:600 24px 'Geist Mono';color:#fafafa;margin-top:2px;letter-spacing:-.02em">10</div></div>
+              </div>
+            </div>
+            <div onClick="{{ onVerDetalhes }}" style="width:100%;margin-top:16px;background:linear-gradient(160deg,#34d399,#10b981);color:#052e1f;font:600 15px 'Geist';text-align:center;padding:15px;border-radius:15px;cursor:pointer">Ver detalhes da nota</div>
+            <div onClick="{{ onScanAgain }}" style="width:100%;margin-top:10px;color:#a1a1aa;font:500 14px 'Geist';text-align:center;padding:12px;cursor:pointer">Escanear outra</div>
+          </div>
+        </sc-if>
+      </div>
+      </sc-if>
+
+      <!-- ============ NOTA DETAIL ============ -->
+      <sc-if value="{{ scr.nota }}">
+      <div style="position:absolute;inset:0;z-index:25;background:#09090b;overflow-y:auto;padding:60px 0 30px">
+        <div style="display:flex;align-items:center;gap:10px;padding:0 16px 14px">
+          <div onClick="{{ back }}" style="width:38px;height:38px;border-radius:12px;background:#18181b;border:1px solid #27272a;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e4e4e7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+          <div style="font:600 17px 'Geist';color:#fafafa">Nota fiscal</div>
+        </div>
+        <div style="padding:0 20px">
+          <div style="display:flex;align-items:center;gap:13px">
+            <div style="width:48px;height:48px;border-radius:14px;background:{{ nota.tintBg }};display:flex;align-items:center;justify-content:center;font:600 18px 'Geist';color:{{ nota.color }}">{{ nota.initial }}</div>
+            <div><div style="font:600 17px 'Geist';color:#fafafa">{{ nota.store }}</div><div style="font:400 12px 'Geist';color:#71717a;margin-top:2px">{{ nota.addr }}</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:14px;margin-top:14px;font:400 12px 'Geist';color:#a1a1aa">
+            <span style="display:flex;align-items:center;gap:5px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>{{ nota.date }}</span>
+            <span style="color:#3f3f46">·</span><span>{{ nota.time }}</span>
+            <span style="color:#3f3f46">·</span><span>{{ nota.count }} itens</span>
+          </div>
+          <div style="background:linear-gradient(160deg,#101014,#18181b);border:1px solid #27272a;border-radius:18px;padding:18px;margin-top:18px;display:flex;align-items:flex-end;justify-content:space-between">
+            <div><div style="font:400 12px 'Geist';color:#71717a">Total da compra</div><div style="font:600 30px 'Geist Mono';color:#fafafa;margin-top:3px;letter-spacing:-.03em">{{ nota.totalStr }}</div></div>
+            <div style="display:flex;align-items:center;gap:6px;background:rgba(52,211,153,.12);border-radius:999px;padding:6px 11px"><span style="width:6px;height:6px;border-radius:50%;background:{{ accent }}"></span><span style="font:500 11.5px 'Geist';color:{{ accent }}">{{ nota.savedStr }} vs média</span></div>
+          </div>
+          <div style="font:600 14px 'Geist';color:#a1a1aa;margin:22px 2px 12px;letter-spacing:.01em">ITENS DA NOTA</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ nota.items }}" as="it" hint-placeholder-count="8">
+              <div style="display:flex;align-items:center;gap:12px;background:#18181b;border:1px solid #27272a;border-radius:14px;padding:12px 14px">
+                <div style="flex:1;min-width:0">
+                  <div style="font:500 13.5px 'Geist';color:#fafafa;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ it.name }}</div>
+                  <div style="font:400 11.5px 'Geist Mono';color:#71717a;margin-top:3px">{{ it.qtyStr }} × {{ it.unitStr }}</div>
+                </div>
+                <div style="flex:none;display:flex;align-items:center;gap:9px">
+                  <sc-if value="{{ it.show }}"><div style="display:flex;align-items:center;gap:3px;font:600 11px 'Geist Mono';color:{{ it.color }}">
+                    <sc-if value="{{ it.up }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></sc-if>
+                    <sc-if value="{{ it.down }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/></svg></sc-if>
+                    {{ it.delta }}</div></sc-if>
+                  <div style="font:600 14px 'Geist Mono';color:#fafafa;min-width:74px;white-space:nowrap;text-align:right;letter-spacing:-.02em">{{ it.subStr }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ PRODUTO DETAIL ============ -->
+      <sc-if value="{{ scr.produto }}">
+      <div style="position:absolute;inset:0;z-index:25;background:#09090b;overflow-y:auto;padding:60px 0 30px">
+        <div style="display:flex;align-items:center;gap:10px;padding:0 16px 14px">
+          <div onClick="{{ back }}" style="width:38px;height:38px;border-radius:12px;background:#18181b;border:1px solid #27272a;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e4e4e7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+          <div style="font:600 17px 'Geist';color:#fafafa">Produto</div>
+        </div>
+        <div style="padding:0 20px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div><div style="font:600 20px 'Geist';color:#fafafa;letter-spacing:-.02em;line-height:1.2">{{ produto.name }}</div><div style="font:400 13px 'Geist';color:#71717a;margin-top:4px">{{ produto.unit }} · {{ produto.cat }}</div></div>
+            <div style="flex:none;display:flex;align-items:center;gap:5px;background:{{ produto.tintBg }};border-radius:999px;padding:6px 11px;color:{{ produto.color }}">
+              <sc-if value="{{ produto.up }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 7h6v6"/><path d="m22 7-8.5 8.5-5-5L2 17"/></svg></sc-if>
+              <sc-if value="{{ produto.down }}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 17h6v-6"/><path d="m22 17-8.5-8.5-5 5L2 7"/></svg></sc-if>
+              <span style="font:600 11.5px 'Geist'">{{ produto.trend }}</span>
+            </div>
+          </div>
+
+          <div style="display:flex;align-items:baseline;gap:10px;margin-top:16px">
+            <div style="font:600 34px 'Geist Mono';color:#fafafa;letter-spacing:-.03em">{{ produto.atualStr }}</div>
+            <div style="font:600 15px 'Geist';color:{{ produto.color }}">{{ produto.varStr }}</div>
+          </div>
+
+          <div style="background:#18181b;border:1px solid #27272a;border-radius:18px;padding:16px 12px 8px;margin-top:16px">
+            <svg viewBox="0 0 345 160" style="width:100%;height:158px;display:block">
+              <defs><linearGradient id="nqgrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="{{ produto.color }}" stop-opacity=".30"/><stop offset="1" stop-color="{{ produto.color }}" stop-opacity="0"/></linearGradient></defs>
+              <path d="{{ produto.chart.area }}" fill="url(#nqgrad)"/>
+              <polyline points="{{ produto.chart.line }}" fill="none" stroke="{{ produto.color }}" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <sc-for list="{{ produto.chart.pts }}" as="pt" hint-placeholder-count="6"><circle cx="{{ pt.cx }}" cy="{{ pt.cy }}" r="3" fill="#09090b" stroke="{{ produto.color }}" stroke-width="2"/></sc-for>
+              <sc-for list="{{ produto.chart.xlabels }}" as="l" hint-placeholder-count="6"><text x="{{ l.x }}" y="154" fill="#52525b" font-size="10.5" font-family="Geist" text-anchor="middle">{{ l.d }}</text></sc-for>
+            </svg>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px">
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:14px;padding:13px 14px"><div style="font:400 11px 'Geist';color:#71717a">Preço atual</div><div style="font:600 18px 'Geist Mono';color:#fafafa;margin-top:3px;letter-spacing:-.02em">{{ produto.atualStr }}</div></div>
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:14px;padding:13px 14px"><div style="font:400 11px 'Geist';color:#71717a">Menor preço</div><div style="font:600 18px 'Geist Mono';color:{{ accent }};margin-top:3px;letter-spacing:-.02em">{{ produto.menorStr }}</div></div>
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:14px;padding:13px 14px"><div style="font:400 11px 'Geist';color:#71717a">Maior preço</div><div style="font:600 18px 'Geist Mono';color:#f87171;margin-top:3px;letter-spacing:-.02em">{{ produto.maiorStr }}</div></div>
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:14px;padding:13px 14px"><div style="font:400 11px 'Geist';color:#71717a">Preço médio</div><div style="font:600 18px 'Geist Mono';color:#e4e4e7;margin-top:3px;letter-spacing:-.02em">{{ produto.medioStr }}</div></div>
+          </div>
+
+          <div style="font:600 14px 'Geist';color:#a1a1aa;margin:22px 2px 12px;letter-spacing:.01em">ONDE ENCONTRAR</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ produto.where }}" as="w" hint-placeholder-count="3">
+              <div style="display:flex;align-items:center;gap:12px;background:#18181b;border:1px solid {{ w.border }};border-radius:14px;padding:12px 14px">
+                <div style="width:36px;height:36px;border-radius:11px;background:{{ w.tintBg }};display:flex;align-items:center;justify-content:center;font:600 14px 'Geist';color:{{ w.color }}">{{ w.initial }}</div>
+                <div style="flex:1;min-width:0"><div style="font:500 13.5px 'Geist';color:#fafafa">{{ w.store }}</div><div style="font:400 11px 'Geist';color:#71717a;margin-top:2px">Registrado em {{ w.date }}</div></div>
+                <div style="flex:none;text-align:right">
+                  <sc-if value="{{ w.lowest }}"><div style="font:600 9.5px 'Geist';color:{{ accent }};text-transform:uppercase;letter-spacing:.04em;margin-bottom:1px">Menor</div></sc-if>
+                  <div style="font:600 14px 'Geist Mono';color:#fafafa;letter-spacing:-.02em">{{ w.priceStr }}</div>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ MERCADO DETAIL ============ -->
+      <sc-if value="{{ scr.mercado }}">
+      <div style="position:absolute;inset:0;z-index:25;background:#09090b;overflow-y:auto;padding:60px 0 30px">
+        <div style="display:flex;align-items:center;gap:10px;padding:0 16px 14px">
+          <div onClick="{{ back }}" style="width:38px;height:38px;border-radius:12px;background:#18181b;border:1px solid #27272a;display:flex;align-items:center;justify-content:center;cursor:pointer"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e4e4e7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></div>
+          <div style="font:600 17px 'Geist';color:#fafafa">Mercado</div>
+        </div>
+        <div style="padding:0 20px">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:54px;height:54px;border-radius:16px;background:{{ mercado.tintBg }};display:flex;align-items:center;justify-content:center;color:{{ mercado.color }}"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.4-4.4A2 2 0 0 1 7.8 2h8.3a2 2 0 0 1 1.5.6L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M2 7h20"/></svg></div>
+            <div><div style="font:600 19px 'Geist';color:#fafafa;letter-spacing:-.02em">{{ mercado.name }}</div><div style="font:400 12.5px 'Geist';color:#71717a;margin-top:3px">{{ mercado.addr }}</div><div style="font:400 11px 'Geist Mono';color:#52525b;margin-top:3px">CNPJ {{ mercado.cnpj }}</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px">
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:14px;padding:13px 14px"><div style="font:400 11px 'Geist';color:#71717a">Notas escaneadas</div><div style="font:600 20px 'Geist Mono';color:#fafafa;margin-top:3px">{{ mercado.notas }}</div></div>
+            <div style="background:#18181b;border:1px solid #27272a;border-radius:14px;padding:13px 14px"><div style="font:400 11px 'Geist';color:#71717a">Total gasto</div><div style="font:600 20px 'Geist Mono';color:#fafafa;margin-top:3px;letter-spacing:-.02em">{{ mercado.gastoStr }}</div></div>
+          </div>
+
+          <div style="font:600 14px 'Geist';color:#a1a1aa;margin:22px 2px 12px;letter-spacing:.01em">MAIS COMPRADOS AQUI</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            <sc-for list="{{ mercado.top }}" as="t" hint-placeholder-count="5">
+              <div style="font:500 12.5px 'Geist';color:#d4d4d8;background:#18181b;border:1px solid #27272a;border-radius:999px;padding:8px 13px">{{ t.name }} <span style="color:#52525b;font-family:'Geist Mono'">×{{ t.count }}</span></div>
+            </sc-for>
+          </div>
+
+          <div style="font:600 14px 'Geist';color:#a1a1aa;margin:22px 2px 12px;letter-spacing:.01em">ÚLTIMAS COMPRAS</div>
+          <div style="background:#18181b;border:1px solid #27272a;border-radius:16px;padding:2px 14px">
+            <sc-for list="{{ mercado.receipts }}" as="r" hint-placeholder-count="3">
+              <div onClick="{{ r.open }}" style="display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid {{ r.divider }};cursor:pointer">
+                <div style="width:36px;height:36px;border-radius:11px;background:#0f0f11;border:1px solid #27272a;display:flex;align-items:center;justify-content:center;color:#71717a"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8M8 11h8"/></svg></div>
+                <div style="flex:1"><div style="font:500 13.5px 'Geist';color:#fafafa">{{ r.date }}</div><div style="font:400 11.5px 'Geist';color:#71717a;margin-top:2px">{{ r.count }} itens</div></div>
+                <div style="display:flex;align-items:center;gap:6px"><div style="font:600 14px 'Geist Mono';color:#e4e4e7;letter-spacing:-.02em">{{ r.totalStr }}</div><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></div>
+              </div>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      </sc-if>
+
+      <!-- ============ BOTTOM TAB BAR ============ -->
+      <sc-if value="{{ scr.tabbar }}">
+      <div style="position:absolute;bottom:0;left:0;right:0;z-index:35;height:92px;background:rgba(9,9,11,.85);backdrop-filter:blur(20px);border-top:1px solid #1c1c1f;display:flex;align-items:flex-start;justify-content:space-around;padding:13px 22px 0">
+        <div onClick="{{ nav.home }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:52px;color:{{ tc.home }}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+          <div style="font:500 10px 'Geist'">Início</div>
+        </div>
+        <div onClick="{{ nav.produtos }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:52px;color:{{ tc.produtos }}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg>
+          <div style="font:500 10px 'Geist'">Produtos</div>
+        </div>
+        <div onClick="{{ nav.mercados }}" style="display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;width:52px;color:{{ tc.mercados }}">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.4-4.4A2 2 0 0 1 7.8 2h8.3a2 2 0 0 1 1.5.6L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M2 7h20"/></svg>
+          <div style="font:500 10px 'Geist'">Mercados</div>
+        </div>
+      </div>
+      </sc-if>
+
+      <div style="position:absolute;bottom:8px;left:50%;transform:translateX(-50%);width:134px;height:5px;border-radius:3px;background:#f4f4f5;opacity:.55;z-index:38;pointer-events:none"></div>
+
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:520,&quot;height&quot;:940},&quot;accentColor&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#fb923c&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tema&quot;,&quot;options&quot;:[&quot;#fb923c&quot;,&quot;#f59e0b&quot;,&quot;#34d399&quot;,&quot;#22d3ee&quot;]},&quot;userName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Marina Alves&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Tema&quot;},&quot;startTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;home&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;home&quot;,&quot;produtos&quot;,&quot;mercados&quot;,&quot;scanner&quot;],&quot;section&quot;:&quot;Tema&quot;}}">
+class Component extends DCLogic {
+  constructor(props){
+    super(props);
+    this.state = { tab: (props && props.startTab) || 'home', ov:null, scan:'camera', filter:'todos', sort:'variacao' };
+  }
+
+  money(n){ return 'R$ ' + n.toFixed(2).replace('.',','); }
+  num(n){ return n.toFixed(2).replace('.',','); }
+
+  data(){
+    if(this._d) return this._d;
+    const stores = [
+      {id:'assai',name:'Assaí Atacadista',short:'Av. Brasil, 1200',addr:'Av. Brasil, 1200 · Centro',cnpj:'12.345.678/0001-90',notas:8,gasto:1284.60,color:'#f59e0b'},
+      {id:'pao',name:'Pão de Açúcar',short:'R. Oscar Freire, 550',addr:'R. Oscar Freire, 550 · Jardins',cnpj:'33.041.260/0652-90',notas:5,gasto:642.15,color:'#22c55e'},
+      {id:'carrefour',name:'Carrefour Bairro',short:'Av. Paulista, 900',addr:'Av. Paulista, 900 · Bela Vista',cnpj:'45.543.915/0001-81',notas:6,gasto:876.40,color:'#3b82f6'},
+      {id:'dia',name:'Supermercado Dia',short:'R. Augusta, 300',addr:'R. Augusta, 300 · Consolação',cnpj:'03.476.811/0001-51',notas:3,gasto:198.75,color:'#ef4444'},
+    ];
+    const P=(id,name,unit,cat,hist,where)=>({id,name,unit,cat,hist,where});
+    const products=[
+      P('arroz','Arroz Tio João Tipo 1','Pacote 5 kg','Mercearia',[26.9,25.5,24.9,23.9,22.9,22.4],[['assai',22.40,'06 Jul'],['carrefour',24.90,'02 Jul'],['pao',27.50,'28 Jun']]),
+      P('cafe','Café Pilão a vácuo','500 g','Mercearia',[13.9,14.5,14.9,15.2,15.6,17.4],[['dia',16.90,'24 Jun'],['assai',17.40,'06 Jul'],['carrefour',18.50,'28 Jun']]),
+      P('leite','Leite Integral Piracanjuba','1 L','Laticínios',[5.99,5.79,5.69,5.49,5.39,5.29],[['assai',5.29,'06 Jul'],['dia',5.49,'24 Jun']]),
+      P('feijao','Feijão Carioca Camil','1 kg','Mercearia',[9.9,9.5,8.9,8.9,8.5,8.29],[['assai',8.29,'06 Jul'],['pao',9.20,'28 Jun']]),
+      P('oleo','Óleo de Soja Liza','900 ml','Mercearia',[6.49,6.79,6.99,7.29,7.59,7.99],[['carrefour',7.99,'02 Jul'],['assai',7.99,'06 Jul']]),
+      P('acucar','Açúcar Cristal União','1 kg','Mercearia',[4.49,4.39,4.59,4.49,4.39,4.29],[['assai',4.29,'06 Jul'],['dia',4.49,'24 Jun']]),
+      P('papel','Papel Higiênico Neve','12 rolos','Higiene',[21.9,22.9,22.5,23.9,24.5,24.9],[['pao',24.90,'28 Jun'],['carrefour',25.90,'02 Jul']]),
+      P('detergente','Detergente Ypê Clear','500 ml','Limpeza',[2.49,2.39,2.29,2.29,2.19,2.09],[['assai',2.09,'06 Jul'],['dia',2.19,'24 Jun']]),
+    ];
+    const months=['Fev','Mar','Abr','Mai','Jun','Jul'];
+    products.forEach(p=>{ p.history=p.hist.map((v,i)=>({d:months[i],p:v})); });
+    const it=(p,q,u,d,v)=>({p,q,u,d,v});
+    const itn=(n,q,u,d,v)=>({n,q,u,d,v});
+    const receipts=[
+      {id:'r1',store:'assai',date:'06 Jul 2025',time:'18:42',items:[
+        it('cafe',1,17.40,'up','+12%'),it('arroz',1,22.40,'down','-2%'),it('leite',6,5.29,'down','-2%'),
+        it('feijao',2,8.29,'down','-2%'),it('oleo',1,7.99,'up','+5%'),it('detergente',3,2.09,'down','-5%'),
+        it('papel',1,24.90,'up','+2%'),it('acucar',4,4.29,'down','-2%'),
+        itn('Sabão em pó OMO 1,6kg',1,28.90,'up','+6%'),itn('Coca-Cola 2 L',2,7.49,'flat','')]},
+      {id:'r2',store:'pao',date:'02 Jul 2025',time:'12:15',items:[
+        it('leite',4,5.49,'up','+4%'),it('papel',1,24.90,'down','-4%'),it('feijao',1,9.20,'up','+8%'),
+        itn('Iogurte Danone 8un',1,12.90,'flat',''),itn('Pão de forma Pullman',2,8.49,'up','+3%')]},
+      {id:'r3',store:'carrefour',date:'28 Jun 2025',time:'19:30',items:[
+        it('arroz',1,24.90,'up','+4%'),it('oleo',1,7.99,'flat',''),it('papel',1,25.90,'up','+2%'),
+        itn('Carne moída 1kg',1,32.90,'up','+9%'),itn('Frango congelado 2kg',1,21.90,'down','-3%'),it('cafe',1,18.50,'up','+6%')]},
+      {id:'r4',store:'dia',date:'24 Jun 2025',time:'09:05',items:[
+        it('leite',2,5.49,'flat',''),it('acucar',2,4.49,'up','+2%'),it('detergente',4,2.19,'down','-4%'),it('cafe',1,16.90,'down','-3%')]},
+    ];
+    this._d={stores,products,receipts};
+    return this._d;
+  }
+
+  go(t){ this.setState({tab:t, ov:null, scan:'camera'}); }
+  openNota(id){ this.setState({ov:{type:'nota',id}}); }
+  openProduto(id){ this.setState({ov:{type:'produto',id}}); }
+  openMercado(id){ this.setState({ov:{type:'mercado',id}}); }
+  back(){ this.setState({ov:null}); }
+  startScan(){ this.setState({scan:'loading'}); clearTimeout(this._t); this._t=setTimeout(()=>this.setState({scan:'success'}),1900); }
+
+  renderVals(){
+    const {stores,products,receipts}=this.data();
+    const st=this.state;
+    const money=n=>this.money(n), num=n=>this.num(n);
+    const storeById=id=>stores.find(s=>s.id===id);
+    const prodById=id=>products.find(p=>p.id===id);
+    const accent=(this.props&&this.props.accentColor)||'#fb923c';
+    const hexA=(hex,a)=>{const h=hex.replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return `rgba(${r},${g},${b},${a})`;};
+    const accentBg=hexA(accent,.13), accentShadow=hexA(accent,.42);
+    const RED='#f87171', REDBG='rgba(248,113,113,.13)', GREY='#a1a1aa';
+
+    const varOf=p=>{const a=p.hist;const last=a[a.length-1],prev=a[a.length-2];const pct=(last-prev)/prev*100;const dir=pct>0.6?'up':pct<-0.6?'down':'flat';return {pct,dir,last};};
+    const dirColor=d=> d==='up'?RED : d==='down'?accent : GREY;
+    const dirBg=d=> d==='up'?REDBG : d==='down'?accentBg : 'rgba(161,161,170,.12)';
+    const spark=a=>{const w=60,h=22,pad=2.5;const mn=Math.min(...a),mx=Math.max(...a),sp=(mx-mn)||1,n=a.length;return a.map((v,i)=>`${(pad+i*((w-2*pad)/(n-1))).toFixed(1)},${(pad+(1-(v-mn)/sp)*(h-2*pad)).toFixed(1)}`).join(' ');};
+    const vStr=pct=>(pct>0?'+':'')+pct.toFixed(1).replace('.',',')+'%';
+
+    // products view-model
+    const pvm=products.map(p=>{const v=varOf(p);return {
+      id:p.id,name:p.name,unit:p.unit,cat:p.cat,lastNum:v.last,pctAbs:Math.abs(v.pct),
+      lastStr:money(v.last),varStr:vStr(v.pct),dir:v.dir,color:dirColor(v.dir),
+      trend:v.dir==='up'?'Subindo':v.dir==='down'?'Descendo':'Estável',spark:spark(p.hist),
+      open:()=>this.openProduto(p.id)
+    };});
+    const pById=id=>pvm.find(x=>x.id===id);
+
+    // alerts (home)
+    const alerts=['cafe','oleo','detergente','feijao'].map(id=>{const p=pById(id);return {
+      name:p.name,varStr:p.varStr,lastStr:p.lastStr,note:p.dir==='up'?'subiu vs. mês anterior':'caiu vs. mês anterior',
+      color:p.color,tintBg:dirBg(p.dir),up:p.dir==='up',down:p.dir==='down',open:()=>this.openProduto(id)
+    };});
+
+    // receipt helpers
+    const rTotal=r=>r.items.reduce((s,i)=>s+i.q*i.u,0);
+    const recent=receipts.map(r=>{const s=storeById(r.store);return {
+      store:s.name,meta:r.date+' · '+r.items.length+' itens',totalStr:money(rTotal(r)),
+      initial:s.name.charAt(0),color:s.color,tintBg:hexA(s.color,.15),divider: r.id==='r4'?'transparent':'#1f1f22',
+      open:()=>this.openNota(r.id)
+    };});
+
+    // filters / sorts for produtos
+    let list=pvm.slice();
+    if(st.filter==='subindo')list=list.filter(x=>x.dir==='up');
+    else if(st.filter==='descendo')list=list.filter(x=>x.dir==='down');
+    else if(st.filter==='estaveis')list=list.filter(x=>x.dir==='flat');
+    if(st.sort==='nome')list.sort((a,b)=>a.name.localeCompare(b.name));
+    else if(st.sort==='preco')list.sort((a,b)=>b.lastNum-a.lastNum);
+    else list.sort((a,b)=>b.pctAbs-a.pctAbs);
+    const fchip=(key,label)=>{const on=st.filter===key;return {label,onClick:()=>this.setState({filter:key}),bg:on?accent:'#18181b',fg:on?'#052e1f':'#a1a1aa',border:on?accent:'#27272a'};};
+    const filters=[fchip('todos','Todos'),fchip('subindo','Subindo'),fchip('descendo','Descendo'),fchip('estaveis','Estáveis')];
+    const schip=(key,label)=>{const on=st.sort===key;return {label,onClick:()=>this.setState({sort:key}),fg:on?accent:'#71717a'};};
+    const sorts=[schip('variacao','variação'),schip('preco','preço'),schip('nome','nome')];
+
+    // mercados list
+    const mercados=stores.map(s=>({name:s.name,short:s.short,notas:s.notas,gastoStr:money(s.gasto),color:s.color,tintBg:hexA(s.color,.15),open:()=>this.openMercado(s.id)}));
+
+    // overlays
+    const ov=st.ov;
+    let nota=null,produto=null,mercado=null;
+    if(ov&&ov.type==='nota'){
+      const r=receipts.find(x=>x.id===ov.id);const s=storeById(r.store);const tot=rTotal(r);
+      nota={store:s.name,addr:s.addr,initial:s.name.charAt(0),color:s.color,tintBg:hexA(s.color,.15),
+        date:r.date,time:r.time,count:r.items.length,totalStr:money(tot),savedStr:'-8%',
+        items:r.items.map(i=>{const nm=i.p?prodById(i.p).name:i.n;return {
+          name:nm,qtyStr:num(i.q).replace(',00','').replace(/,\d0$/,m=>m),unitStr:money(i.u),subStr:money(i.q*i.u),
+          delta:i.v,show:!!i.v,up:i.d==='up',down:i.d==='down',color:dirColor(i.d)
+        };})};
+      nota.items.forEach(x=>{ x.qtyStr = x.qtyStr; });
+    }
+    if(ov&&ov.type==='produto'){
+      const p=prodById(ov.id);const v=varOf(p);const ps=p.hist;
+      const mn=Math.min(...ps),mx=Math.max(...ps),avg=ps.reduce((a,b)=>a+b,0)/ps.length;
+      const W=345,H=160,PX=8,PT=14,PB=26,n=p.history.length,sp=(mx-mn)||1;
+      const pts=p.history.map((x,i)=>({cx:+(PX+i*((W-2*PX)/(n-1))).toFixed(1),cy:+(PT+(1-(x.p-mn)/sp)*(H-PT-PB)).toFixed(1)}));
+      const line=pts.map(q=>q.cx+','+q.cy).join(' ');
+      const area=`M ${pts[0].cx},${(H-PB).toFixed(1)} `+pts.map(q=>`L ${q.cx},${q.cy}`).join(' ')+` L ${pts[n-1].cx},${(H-PB).toFixed(1)} Z`;
+      const xlabels=p.history.map((x,i)=>({d:x.d,x:+(PX+i*((W-2*PX)/(n-1))).toFixed(1)}));
+      const wmin=Math.min(...p.where.map(w=>w[1]));
+      const where=p.where.map(w=>{const s=storeById(w[0]);return {store:s.name,initial:s.name.charAt(0),color:s.color,tintBg:hexA(s.color,.15),date:w[2],priceStr:money(w[1]),lowest:w[1]===wmin,border:w[1]===wmin?accent:'#27272a'};});
+      produto={name:p.name,unit:p.unit,cat:p.cat,trend:v.dir==='up'?'Subindo':v.dir==='down'?'Descendo':'Estável',
+        up:v.dir==='up',down:v.dir==='down',color:dirColor(v.dir),tintBg:dirBg(v.dir),varStr:vStr(v.pct),
+        atualStr:money(v.last),menorStr:money(mn),maiorStr:money(mx),medioStr:money(avg),
+        chart:{line,area,pts,xlabels},where};
+    }
+    if(ov&&ov.type==='mercado'){
+      const s=storeById(ov.id);const rs=receipts.filter(r=>r.store===s.id);
+      const counts={};rs.forEach(r=>r.items.forEach(i=>{const nm=i.p?prodById(i.p).name:i.n;counts[nm]=(counts[nm]||0)+1;}));
+      const top=Object.keys(counts).map(k=>({name:k,count:counts[k]})).sort((a,b)=>b.count-a.count).slice(0,6);
+      mercado={name:s.name,addr:s.addr,cnpj:s.cnpj,notas:s.notas,gastoStr:money(s.gasto),color:s.color,tintBg:hexA(s.color,.15),top,
+        receipts:rs.map((r,i)=>({date:r.date,count:r.items.length,totalStr:money(rTotal(r)),divider:i===rs.length-1?'transparent':'#1f1f22',open:()=>this.openNota(r.id)}))};
+    }
+
+    const scr={
+      home: st.tab==='home'&&!ov, produtos: st.tab==='produtos'&&!ov, mercados: st.tab==='mercados'&&!ov,
+      scanner: st.tab==='scanner'&&!ov, nota: !!(ov&&ov.type==='nota'), produto: !!(ov&&ov.type==='produto'),
+      mercado: !!(ov&&ov.type==='mercado'), tabbar: !ov
+    };
+    const tc={ home: st.tab==='home'?accent:'#71717a', produtos: st.tab==='produtos'?accent:'#71717a',
+      mercados: st.tab==='mercados'?accent:'#71717a', scanner: st.tab==='scanner'?accent:'#71717a' };
+
+    return {
+      userName:(this.props&&this.props.userName)||'Marina Alves',
+      accent, accentHi:'#6ee7b7', accentShadow,
+      scr, tc, alerts, recent, produtos:list, filters, sorts, mercados, nota, produto, mercado,
+      scan:{ cam:st.scan==='camera', loading:st.scan==='loading', success:st.scan==='success' },
+      nav:{ home:()=>this.go('home'), produtos:()=>this.go('produtos'), mercados:()=>this.go('mercados'), scanner:()=>this.go('scanner') },
+      back:()=>this.back(),
+      onScan:()=>this.startScan(),
+      onScanAgain:()=>this.setState({scan:'camera'}),
+      onVerDetalhes:()=>this.setState({ov:{type:'nota',id:'r1'},scan:'camera'})
+    };
+  }
+}
+</script>
+</body>
+</html>

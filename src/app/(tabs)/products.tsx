@@ -1,28 +1,93 @@
-import { useCallback, useState } from 'react';
-import { FlatList, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { FlatList, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { useFocusEffect } from 'expo-router';
-import { desc, eq, like } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
+import { Search } from 'lucide-react-native';
+import Svg, { Polyline } from 'react-native-svg';
 
 import { EmptyState } from '@/components/EmptyState';
-import { ProductCard } from '@/components/ProductCard';
-import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { priceEntries, products } from '@/db/schema';
 import { calculatePriceChange } from '@/services/price-analyzer';
 import type { PriceChange } from '@/types';
 
+// --- Types ---
+
+type FilterOption = 'todos' | 'subindo' | 'descendo' | 'estaveis';
+type SortOption = 'variacao' | 'preco' | 'nome';
+
 interface ProductWithPrice {
   id: number;
   name: string;
+  unit: string | null;
   lastPrice: number;
   priceChange: PriceChange | null;
+  recentPrices: number[];
 }
+
+// --- Filter / Sort Labels ---
+
+const FILTERS: { key: FilterOption; label: string }[] = [
+  { key: 'todos', label: 'Todos' },
+  { key: 'subindo', label: 'Subindo' },
+  { key: 'descendo', label: 'Descendo' },
+  { key: 'estaveis', label: 'Estáveis' },
+];
+
+const SORTS: { key: SortOption; label: string }[] = [
+  { key: 'variacao', label: 'variação' },
+  { key: 'preco', label: 'preço' },
+  { key: 'nome', label: 'nome' },
+];
+
+// --- Sparkline Component ---
+
+function Sparkline({ prices, direction }: { prices: number[]; direction?: 'up' | 'down' | 'stable' }) {
+  if (prices.length < 2) return <View className="h-[22px] w-[56px]" />;
+
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  const range = max - min || 1;
+
+  const w = 56;
+  const h = 22;
+  const padding = 2;
+  const innerW = w - padding * 2;
+  const innerH = h - padding * 2;
+
+  const points = prices
+    .map((price, i) => {
+      const x = padding + (i / (prices.length - 1)) * innerW;
+      const y = padding + innerH - ((price - min) / range) * innerH;
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  const strokeColor =
+    direction === 'up' ? '#f87171' : direction === 'down' ? '#34d399' : '#71717a';
+
+  return (
+    <Svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
+      <Polyline
+        points={points}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </Svg>
+  );
+}
+
+// --- Main Screen ---
 
 export default function ProductsScreen() {
   const [items, setItems] = useState<ProductWithPrice[]>([]);
-  const [filteredItems, setFilteredItems] = useState<ProductWithPrice[]>([]);
   const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState<FilterOption>('todos');
+  const [sort, setSort] = useState<SortOption>('variacao');
   const [loading, setLoading] = useState(true);
 
   const loadProducts = useCallback(async () => {
@@ -31,21 +96,27 @@ export default function ProductsScreen() {
     const withPrices: ProductWithPrice[] = [];
 
     for (const p of allProducts) {
-      const [latest] = await db
+      const entries = await db
         .select()
         .from(priceEntries)
         .where(eq(priceEntries.productId, p.id))
         .orderBy(desc(priceEntries.recordedAt))
-        .limit(1);
+        .limit(8);
 
-      if (latest) {
+      if (entries.length > 0) {
         const change = await calculatePriceChange(p.id);
-        withPrices.push({ id: p.id, name: p.name, lastPrice: latest.unitPrice, priceChange: change });
+        withPrices.push({
+          id: p.id,
+          name: p.name,
+          unit: p.unit,
+          lastPrice: entries[0].unitPrice,
+          priceChange: change,
+          recentPrices: entries.map((e) => e.unitPrice).reverse(),
+        });
       }
     }
 
     setItems(withPrices);
-    setFilteredItems(withPrices);
     setLoading(false);
   }, []);
 
@@ -55,15 +126,45 @@ export default function ProductsScreen() {
     }, [loadProducts])
   );
 
-  const handleSearch = (text: string) => {
-    setSearch(text);
-    if (!text.trim()) {
-      setFilteredItems(items);
-    } else {
-      const query = text.toUpperCase();
-      setFilteredItems(items.filter((item) => item.name.includes(query)));
+  // --- Derived list (search + filter + sort) ---
+
+  const displayItems = useMemo(() => {
+    let result = items;
+
+    // Search
+    if (search.trim()) {
+      const q = search.toUpperCase();
+      result = result.filter((item) => item.name.includes(q));
     }
-  };
+
+    // Filter
+    if (filter === 'subindo') {
+      result = result.filter((item) => item.priceChange?.direction === 'up');
+    } else if (filter === 'descendo') {
+      result = result.filter((item) => item.priceChange?.direction === 'down');
+    } else if (filter === 'estaveis') {
+      result = result.filter(
+        (item) => !item.priceChange || item.priceChange.direction === 'stable'
+      );
+    }
+
+    // Sort
+    result = [...result].sort((a, b) => {
+      if (sort === 'variacao') {
+        const aV = Math.abs(a.priceChange?.changePercent ?? 0);
+        const bV = Math.abs(b.priceChange?.changePercent ?? 0);
+        return bV - aV;
+      }
+      if (sort === 'preco') {
+        return b.lastPrice - a.lastPrice;
+      }
+      return a.name.localeCompare(b.name);
+    });
+
+    return result;
+  }, [items, search, filter, sort]);
+
+  // --- Empty state ---
 
   if (!loading && items.length === 0) {
     return (
@@ -75,37 +176,137 @@ export default function ProductsScreen() {
   }
 
   return (
-    <View className="flex-1 bg-background p-3 pt-14">
-      <Text className="mb-3 text-2xl font-bold text-foreground">Produtos</Text>
+    <View className="flex-1 bg-background px-4 pt-14">
+      {/* Title */}
+      <Text className="mb-4 text-2xl font-semibold text-white">Produtos</Text>
 
-      <Input
-        value={search}
-        onChangeText={handleSearch}
-        placeholder="Buscar produto..."
-        className="mb-3"
-      />
+      {/* Search Bar */}
+      <View className="mb-3 flex-row items-center rounded-[14px] border border-zinc-800 bg-zinc-900 p-3">
+        <Search size={18} color="#71717a" />
+        <TextInput
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Buscar produto…"
+          placeholderTextColor="#71717a"
+          className="ml-2 flex-1 text-sm text-white"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
+      </View>
 
+      {/* Filter Chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        className="mb-3 max-h-9"
+        contentContainerClassName="gap-2"
+      >
+        {FILTERS.map((f) => {
+          const active = filter === f.key;
+          return (
+            <Pressable
+              key={f.key}
+              onPress={() => setFilter(f.key)}
+              className={`rounded-full border px-3.5 py-1.5 ${
+                active
+                  ? 'border-transparent bg-price-down'
+                  : 'border-zinc-800 bg-zinc-900'
+              }`}
+            >
+              <Text
+                className={`text-xs font-medium ${
+                  active ? 'text-zinc-950' : 'text-zinc-400'
+                }`}
+              >
+                {f.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+
+      {/* Sort Row */}
+      <View className="mb-3 flex-row items-center gap-2">
+        <Text className="text-xs text-zinc-500">Ordenar:</Text>
+        {SORTS.map((s) => {
+          const active = sort === s.key;
+          return (
+            <Pressable key={s.key} onPress={() => setSort(s.key)}>
+              <Text
+                className={`text-xs font-medium ${
+                  active ? 'text-price-down' : 'text-zinc-400'
+                }`}
+              >
+                {s.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      {/* Product List */}
       <FlatList
-        data={filteredItems}
+        data={displayItems}
         keyExtractor={(item) => String(item.id)}
-        renderItem={({ item }) => (
-          <View className="mb-2">
-            <ProductCard
-              productId={item.id}
-              name={item.name}
-              lastPrice={item.lastPrice}
-              priceChange={item.priceChange}
-            />
-          </View>
-        )}
+        showsVerticalScrollIndicator={false}
+        contentContainerClassName="pb-24 gap-2"
+        renderItem={({ item }) => <ProductRow item={item} />}
         ListEmptyComponent={
-          search ? (
+          search || filter !== 'todos' ? (
             <View className="items-center p-6">
-              <Text className="text-muted-foreground">Nenhum produto encontrado</Text>
+              <Text className="text-zinc-500">Nenhum produto encontrado</Text>
             </View>
           ) : null
         }
       />
+    </View>
+  );
+}
+
+// --- Product Row Component ---
+
+function ProductRow({ item }: { item: ProductWithPrice }) {
+  const direction = item.priceChange?.direction;
+  const changePercent = item.priceChange?.changePercent ?? 0;
+
+  const variationColor =
+    direction === 'up'
+      ? 'text-price-up'
+      : direction === 'down'
+        ? 'text-price-down'
+        : 'text-zinc-500';
+
+  const variationPrefix = direction === 'up' ? '+' : direction === 'down' ? '' : '';
+
+  return (
+    <View className="flex-row items-center rounded-2xl border border-zinc-800 bg-zinc-900 p-3.5">
+      {/* Left: Name + Unit */}
+      <View className="flex-1 shrink">
+        <Text className="text-sm font-semibold text-white" numberOfLines={1}>
+          {item.name}
+        </Text>
+        {item.unit ? (
+          <Text className="mt-0.5 text-xs text-zinc-500">{item.unit}</Text>
+        ) : null}
+      </View>
+
+      {/* Middle: Sparkline */}
+      <View className="mx-3">
+        <Sparkline prices={item.recentPrices} direction={direction} />
+      </View>
+
+      {/* Right: Price + Variation */}
+      <View className="items-end">
+        <Text className="font-mono text-sm font-semibold text-white">
+          R$ {item.lastPrice.toFixed(2)}
+        </Text>
+        {item.priceChange ? (
+          <Text className={`mt-0.5 text-xs ${variationColor}`}>
+            {variationPrefix}
+            {changePercent.toFixed(1)}%
+          </Text>
+        ) : null}
+      </View>
     </View>
   );
 }

@@ -3,7 +3,6 @@ import '../../global.css';
 import { ActivityIndicator, View } from 'react-native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useColorScheme } from 'nativewind';
 
 import { Text } from '@/components/ui/text';
 import { useDatabaseMigrations } from '@/db/client';
@@ -24,14 +23,20 @@ function AppContent() {
   if (!success) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
-        <ActivityIndicator size="large" />
+        <ActivityIndicator size="large" color="#34d399" />
         <Text className="mt-2 text-muted-foreground">Inicializando...</Text>
       </View>
     );
   }
 
   return (
-    <Stack>
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: '#09090b' },
+        headerTintColor: '#fafafa',
+        contentStyle: { backgroundColor: '#09090b' },
+      }}
+    >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="scan"
@@ -44,11 +49,9 @@ function AppContent() {
 }
 
 export default function RootLayout() {
-  const { colorScheme } = useColorScheme();
-
   return (
     <>
-      <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />
+      <StatusBar style="light" />
       <AppContent />
     </>
   );

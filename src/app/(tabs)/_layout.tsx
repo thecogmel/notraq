@@ -1,20 +1,35 @@
-import { Pressable, View } from 'react-native';
-import { Tabs, router } from 'expo-router';
-import { History, Home, Plus, ShoppingBag } from 'lucide-react-native';
+import { Tabs } from 'expo-router';
+import { Home, Package, Store } from 'lucide-react-native';
+import { Platform } from 'react-native';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: 'hsl(221, 83%, 53%)',
-        tabBarStyle: { height: 60, paddingBottom: 8 },
+        tabBarActiveTintColor: '#34d399',
+        tabBarInactiveTintColor: '#71717a',
+        tabBarStyle: {
+          backgroundColor: 'rgba(9, 9, 11, 0.85)',
+          borderTopColor: '#27272a',
+          borderTopWidth: 1,
+          height: Platform.OS === 'ios' ? 88 : 64,
+          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
+          paddingTop: 8,
+          ...(Platform.OS === 'ios' && {
+            position: 'absolute',
+          }),
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '500',
+        },
         headerShown: false,
       }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Início',
           tabBarIcon: ({ color, size }) => <Home color={color} size={size} />,
         }}
       />
@@ -22,33 +37,18 @@ export default function TabLayout() {
         name="products"
         options={{
           title: 'Produtos',
-          tabBarIcon: ({ color, size }) => <ShoppingBag color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Package color={color} size={size} />,
         }}
       />
       <Tabs.Screen
-        name="scan-placeholder"
+        name="markets"
         options={{
-          title: '',
-          tabBarIcon: () => (
-            <View className="absolute -top-4 rounded-full bg-primary p-3 shadow-lg" style={{ elevation: 6 }}>
-              <Plus color="white" size={24} strokeWidth={2.5} />
-            </View>
-          ),
-        }}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            router.push('/scan');
-          },
+          title: 'Mercados',
+          tabBarIcon: ({ color, size }) => <Store color={color} size={size} />,
         }}
       />
-      <Tabs.Screen
-        name="history"
-        options={{
-          title: 'Histórico',
-          tabBarIcon: ({ color, size }) => <History color={color} size={size} />,
-        }}
-      />
+      {/* Hide removed routes from tabs */}
+      <Tabs.Screen name="history" options={{ href: null }} />
     </Tabs>
   );
 }

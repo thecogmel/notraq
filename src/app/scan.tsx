@@ -1,12 +1,17 @@
-import { useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Animated, Alert, Easing, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import { Camera, Image, Keyboard, X } from 'lucide-react-native';
+import {
+  Camera,
+  Check,
+  ChevronLeft,
+  Image,
+  Keyboard,
+  X,
+} from 'lucide-react-native';
 
 import { ManualEntryForm } from '@/components/ManualEntryForm';
 import { ScannerView } from '@/components/ScannerView';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { pickAndScanQr } from '@/services/image-scanner';
 import { createManualReceipt } from '@/services/nfce-parser';
@@ -15,10 +20,65 @@ import { ingestReceipt } from '@/services/receipt-ingestion';
 import { useAppStore } from '@/store/app-store';
 
 type ScanMode = 'choose' | 'camera' | 'manual';
+type ScanState = 'idle' | 'loading' | 'success';
 
 export default function ScanModal() {
   const [mode, setMode] = useState<ScanMode>('choose');
+  const [scanState, setScanState] = useState<ScanState>('idle');
+  const [successData, setSuccessData] = useState<{
+    receiptId: number;
+    itemCount: number;
+    storeName: string;
+  } | null>(null);
   const { isProcessing, setProcessing, setError, setPendingUrl } = useAppStore();
+
+  // Animated values (stable across renders)
+  const scanLineAnim = useMemo(() => new Animated.Value(0), []);
+  const pulseAnim = useMemo(() => new Animated.Value(1), []);
+
+  useEffect(() => {
+    if (mode === 'camera') {
+      const scanLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(scanLineAnim, {
+            toValue: 1,
+            duration: 2000,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+          Animated.timing(scanLineAnim, {
+            toValue: 0,
+            duration: 2000,
+            easing: Easing.inOut(Easing.ease),
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+      const pulseLoop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, {
+            toValue: 0.4,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(pulseAnim, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+      scanLoop.start();
+      pulseLoop.start();
+
+      return () => {
+        scanLoop.stop();
+        pulseLoop.stop();
+      };
+    }
+  }, [mode, scanLineAnim, pulseAnim]);
 
   const handleQrData = (url: string) => {
     if (isProcessing) return;
@@ -45,15 +105,19 @@ export default function ScanModal() {
   const handlePickImage = async () => {
     try {
       setProcessing(true);
+      setScanState('loading');
       const qrData = await pickAndScanQr();
 
       if (!qrData) {
+        setScanState('idle');
         Alert.alert('QR não encontrado', 'Não foi possível detectar um QR code na imagem.');
         return;
       }
 
+      setScanState('idle');
       handleQrData(qrData);
     } catch (e) {
+      setScanState('idle');
       const msg = e instanceof Error ? e.message : 'Erro ao processar imagem';
       Alert.alert('Erro', msg);
     } finally {
@@ -66,6 +130,7 @@ export default function ScanModal() {
     items: { name: string; price: string; quantity: string }[];
   }) => {
     setProcessing(true);
+    setScanState('loading');
     try {
       const receipt = createManualReceipt({
         storeName: data.storeName,
@@ -78,9 +143,14 @@ export default function ScanModal() {
       });
 
       const receiptId = await ingestReceipt(receipt);
-      Alert.alert('Salvo!', `${receipt.items.length} item(ns) adicionado(s).`);
-      router.replace(`/receipt/${receiptId}` as never);
+      setScanState('success');
+      setSuccessData({
+        receiptId,
+        itemCount: receipt.items.length,
+        storeName: data.storeName,
+      });
     } catch (e) {
+      setScanState('idle');
       const msg = e instanceof Error ? e.message : 'Erro ao salvar';
       setError(msg);
       Alert.alert('Erro', msg);
@@ -89,100 +159,235 @@ export default function ScanModal() {
     }
   };
 
-  // Tela de escolha
+  // Loading overlay
+  if (scanState === 'loading') {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#0a0a0b]">
+        <View className="items-center gap-4">
+          <ActivityIndicator size="large" color="#34d399" />
+          <Text className="text-base text-zinc-300">Processando nota fiscal...</Text>
+          <Text className="text-sm text-zinc-500">Aguarde um momento</Text>
+        </View>
+      </View>
+    );
+  }
+
+  // Success state
+  if (scanState === 'success' && successData) {
+    return (
+      <View className="flex-1 items-center justify-center bg-[#0a0a0b] px-6">
+        <View className="items-center gap-6">
+          {/* Green checkmark circle */}
+          <View className="h-20 w-20 items-center justify-center rounded-full bg-[#34d399]/20">
+            <View className="h-14 w-14 items-center justify-center rounded-full bg-[#34d399]">
+              <Check size={28} color="#0a0a0b" strokeWidth={3} />
+            </View>
+          </View>
+
+          <Text className="text-xl font-bold text-white">Nota adicionada!</Text>
+
+          {/* Summary card */}
+          <View className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+            <View className="gap-2">
+              <View className="flex-row justify-between">
+                <Text className="text-sm text-zinc-400">Mercado</Text>
+                <Text className="text-sm font-medium text-white">
+                  {successData.storeName}
+                </Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-sm text-zinc-400">Itens</Text>
+                <Text className="text-sm font-medium text-white">
+                  {successData.itemCount}
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          {/* Ver detalhes button */}
+          <Pressable
+            className="w-full rounded-xl bg-[#34d399] px-6 py-3.5"
+            onPress={() => router.replace(`/receipt/${successData.receiptId}` as never)}
+          >
+            <Text className="text-center text-base font-semibold text-[#0a0a0b]">
+              Ver detalhes
+            </Text>
+          </Pressable>
+
+          <Pressable onPress={() => router.back()}>
+            <Text className="text-sm text-zinc-400">Fechar</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
+  // Choose mode screen
   if (mode === 'choose') {
     return (
-      <View className="flex-1 bg-background">
+      <View className="flex-1 bg-[#0a0a0b]">
         {/* Header */}
-        <View className="flex-row items-center justify-between border-b border-border p-4 pt-14">
-          <Text className="text-xl font-bold text-foreground">Adicionar Nota</Text>
-          <Pressable onPress={() => router.back()} hitSlop={12}>
-            <X size={24} className="text-foreground" />
+        <View className="flex-row items-center justify-between px-4 pb-4 pt-14">
+          <Text className="text-xl font-bold text-white">Adicionar Nota</Text>
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={12}
+            className="h-9 w-9 items-center justify-center rounded-full bg-zinc-900"
+          >
+            <X size={18} color="#a1a1aa" />
           </Pressable>
         </View>
 
-        {/* Opções */}
-        <View className="flex-1 justify-center gap-4 p-6">
+        {/* Options */}
+        <View className="flex-1 justify-center gap-3 px-5">
           <Pressable onPress={() => setMode('camera')}>
-            <Card>
-              <CardContent className="flex-row items-center gap-4 p-4">
-                <View className="rounded-full bg-primary/10 p-3">
-                  <Camera size={28} color="hsl(221, 83%, 53%)" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base font-semibold">Escanear QR Code</Text>
-                  <Text className="text-sm text-muted-foreground">
-                    Aponte a câmera para o QR do cupom fiscal
-                  </Text>
-                </View>
-              </CardContent>
-            </Card>
+            <View className="flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+              <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
+                <Camera size={24} color="#34d399" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-white">Escanear QR Code</Text>
+                <Text className="text-sm text-zinc-400">
+                  Aponte a câmera para o QR do cupom fiscal
+                </Text>
+              </View>
+            </View>
           </Pressable>
 
           <Pressable onPress={handlePickImage}>
-            <Card>
-              <CardContent className="flex-row items-center gap-4 p-4">
-                <View className="rounded-full bg-primary/10 p-3">
-                  <Image size={28} color="hsl(221, 83%, 53%)" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base font-semibold">Importar Foto</Text>
-                  <Text className="text-sm text-muted-foreground">
-                    Selecione uma foto do cupom na galeria
-                  </Text>
-                </View>
-              </CardContent>
-            </Card>
+            <View className="flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+              <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
+                <Image size={24} color="#34d399" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-white">Importar Foto</Text>
+                <Text className="text-sm text-zinc-400">
+                  Selecione uma foto do cupom na galeria
+                </Text>
+              </View>
+            </View>
           </Pressable>
 
           <Pressable onPress={() => setMode('manual')}>
-            <Card>
-              <CardContent className="flex-row items-center gap-4 p-4">
-                <View className="rounded-full bg-primary/10 p-3">
-                  <Keyboard size={28} color="hsl(221, 83%, 53%)" />
-                </View>
-                <View className="flex-1">
-                  <Text className="text-base font-semibold">Digitar Manualmente</Text>
-                  <Text className="text-sm text-muted-foreground">
-                    Adicione produtos e preços na mão
-                  </Text>
-                </View>
-              </CardContent>
-            </Card>
+            <View className="flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
+              <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
+                <Keyboard size={24} color="#34d399" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-base font-semibold text-white">Digitar Manualmente</Text>
+                <Text className="text-sm text-zinc-400">
+                  Adicione produtos e preços na mão
+                </Text>
+              </View>
+            </View>
           </Pressable>
         </View>
       </View>
     );
   }
 
-  // Câmera
+  // Camera mode
   if (mode === 'camera') {
     return (
-      <View className="flex-1 bg-background">
-        <View className="flex-row items-center justify-between border-b border-border p-4 pt-14">
-          <Pressable onPress={() => setMode('choose')}>
-            <Text className="text-primary">← Voltar</Text>
+      <View className="flex-1 bg-[#0a0a0b]">
+        {/* Header */}
+        <View className="flex-row items-center justify-between px-4 pb-3 pt-14">
+          <Pressable
+            onPress={() => setMode('choose')}
+            hitSlop={12}
+            className="h-9 w-9 items-center justify-center rounded-full bg-zinc-900"
+          >
+            <ChevronLeft size={18} color="#a1a1aa" />
           </Pressable>
-          <Text className="text-lg font-bold">Escanear QR</Text>
-          <Pressable onPress={() => router.back()} hitSlop={12}>
-            <X size={24} className="text-foreground" />
+          <Text className="text-lg font-bold text-white">Escanear QR</Text>
+          <Pressable
+            onPress={() => router.back()}
+            hitSlop={12}
+            className="h-9 w-9 items-center justify-center rounded-full bg-zinc-900"
+          >
+            <X size={18} color="#a1a1aa" />
           </Pressable>
         </View>
-        <ScannerView onScan={handleQrData} enabled={!isProcessing} />
+
+        {/* Camera with overlay */}
+        <View className="flex-1">
+          <ScannerView onScan={handleQrData} enabled={!isProcessing} />
+
+          {/* QR Frame overlay */}
+          <View className="absolute inset-0 items-center justify-center">
+            <View className="h-[250px] w-[250px]">
+              {/* Corner brackets */}
+              {/* Top-left */}
+              <View className="absolute left-0 top-0 h-[40px] w-[40px] border-l-[3px] border-t-[3px] border-[#34d399] rounded-tl-md" />
+              {/* Top-right */}
+              <View className="absolute right-0 top-0 h-[40px] w-[40px] border-r-[3px] border-t-[3px] border-[#34d399] rounded-tr-md" />
+              {/* Bottom-left */}
+              <View className="absolute bottom-0 left-0 h-[40px] w-[40px] border-b-[3px] border-l-[3px] border-[#34d399] rounded-bl-md" />
+              {/* Bottom-right */}
+              <View className="absolute bottom-0 right-0 h-[40px] w-[40px] border-b-[3px] border-r-[3px] border-[#34d399] rounded-br-md" />
+
+              {/* Animated scan line */}
+              <Animated.View
+                style={{
+                  position: 'absolute',
+                  left: 8,
+                  right: 8,
+                  height: 2,
+                  backgroundColor: '#34d399',
+                  borderRadius: 1,
+                  opacity: 0.8,
+                  transform: [
+                    {
+                      translateY: scanLineAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [10, 238],
+                      }),
+                    },
+                  ],
+                }}
+              />
+            </View>
+          </View>
+
+          {/* Bottom text */}
+          <View className="absolute bottom-12 left-0 right-0 items-center gap-2">
+            <View className="flex-row items-center gap-2">
+              <Animated.View
+                style={{ opacity: pulseAnim }}
+                className="h-2 w-2 rounded-full bg-[#34d399]"
+              />
+              <Text className="text-base font-bold text-white">
+                Aponte para o QR code
+              </Text>
+            </View>
+            <Text className="text-sm text-zinc-400">
+              Posicione o QR code dentro da moldura
+            </Text>
+          </View>
+        </View>
       </View>
     );
   }
 
-  // Manual
+  // Manual mode
   return (
-    <View className="flex-1 bg-background">
-      <View className="flex-row items-center justify-between border-b border-border p-4 pt-14">
-        <Pressable onPress={() => setMode('choose')}>
-          <Text className="text-primary">← Voltar</Text>
+    <View className="flex-1 bg-[#0a0a0b]">
+      {/* Header */}
+      <View className="flex-row items-center justify-between px-4 pb-3 pt-14">
+        <Pressable
+          onPress={() => setMode('choose')}
+          hitSlop={12}
+          className="h-9 w-9 items-center justify-center rounded-full bg-zinc-900"
+        >
+          <ChevronLeft size={18} color="#a1a1aa" />
         </Pressable>
-        <Text className="text-lg font-bold">Entrada Manual</Text>
-        <Pressable onPress={() => router.back()} hitSlop={12}>
-          <X size={24} className="text-foreground" />
+        <Text className="text-lg font-bold text-white">Entrada Manual</Text>
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={12}
+          className="h-9 w-9 items-center justify-center rounded-full bg-zinc-900"
+        >
+          <X size={18} color="#a1a1aa" />
         </Pressable>
       </View>
       <ManualEntryForm onSubmit={handleManualSubmit} isLoading={isProcessing} />
