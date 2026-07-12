@@ -97,7 +97,7 @@ export default function ProductsScreen() {
     // Search
     if (search.trim()) {
       const q = search.toUpperCase();
-      result = result.filter((item) => item.name.includes(q));
+      result = result.filter((item) => item.name.toUpperCase().includes(q));
     }
 
     // Filter
