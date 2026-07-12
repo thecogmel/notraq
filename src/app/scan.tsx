@@ -29,6 +29,7 @@ export default function ScanModal() {
     receiptId: number;
     itemCount: number;
     storeName: string;
+    totalAmount: number;
   } | null>(null);
   const { isProcessing, setProcessing, setError, setPendingUrl } = useAppStore();
 
@@ -147,7 +148,8 @@ export default function ScanModal() {
       setSuccessData({
         receiptId,
         itemCount: receipt.items.length,
-        storeName: data.storeName,
+        storeName: data.storeName || 'Entrada Manual',
+        totalAmount: receipt.totalAmount,
       });
     } catch (e) {
       setScanState('idle');
@@ -175,29 +177,52 @@ export default function ScanModal() {
   // Success state
   if (scanState === 'success' && successData) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#0a0a0b] px-6">
-        <View className="items-center gap-6">
+      <View className="flex-1 items-center bg-[#0a0a0b] px-6 pt-24">
+        <View className="w-full items-center gap-5">
           {/* Green checkmark circle */}
-          <View className="h-20 w-20 items-center justify-center rounded-full bg-[#34d399]/20">
-            <View className="h-14 w-14 items-center justify-center rounded-full bg-[#34d399]">
-              <Check size={28} color="#0a0a0b" strokeWidth={3} />
+          <View className="h-[74px] w-[74px] items-center justify-center rounded-full bg-[#34d399]/15">
+            <View className="h-[52px] w-[52px] items-center justify-center rounded-full bg-[#34d399]">
+              <Check size={28} color="#052e1f" strokeWidth={3} />
             </View>
           </View>
 
-          <Text className="text-xl font-bold text-white">Nota adicionada!</Text>
+          <View className="items-center gap-1">
+            <Text className="text-xl font-bold text-white">Nota registrada!</Text>
+            <Text className="text-sm text-zinc-400">
+              {successData.itemCount} {successData.itemCount === 1 ? 'item adicionado' : 'itens adicionados'} ao histórico
+            </Text>
+          </View>
 
-          {/* Summary card */}
-          <View className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-            <View className="gap-2">
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-zinc-400">Mercado</Text>
-                <Text className="text-sm font-medium text-white">
-                  {successData.storeName}
+          {/* Summary card - expanded */}
+          <View className="w-full rounded-2xl border border-zinc-800 bg-zinc-900 p-5">
+            {/* Store header */}
+            <View className="flex-row items-center gap-3 border-b border-zinc-800 pb-4">
+              <View className="h-11 w-11 items-center justify-center rounded-xl bg-[#fb923c]/15">
+                <Text className="text-base font-semibold text-[#fb923c]">
+                  {successData.storeName.charAt(0).toUpperCase()}
                 </Text>
               </View>
-              <View className="flex-row justify-between">
-                <Text className="text-sm text-zinc-400">Itens</Text>
-                <Text className="text-sm font-medium text-white">
+              <View>
+                <Text className="text-base font-semibold text-white">
+                  {successData.storeName}
+                </Text>
+                <Text className="text-xs text-zinc-500">
+                  {new Date().toLocaleDateString('pt-BR')} · {new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </Text>
+              </View>
+            </View>
+
+            {/* Stats row */}
+            <View className="flex-row justify-between pt-4">
+              <View>
+                <Text className="text-xs text-zinc-500">Total da compra</Text>
+                <Text className="mt-1 font-mono text-2xl font-semibold text-white">
+                  R$ {successData.totalAmount.toFixed(2).replace('.', ',')}
+                </Text>
+              </View>
+              <View className="items-end">
+                <Text className="text-xs text-zinc-500">Itens</Text>
+                <Text className="mt-1 font-mono text-2xl font-semibold text-white">
                   {successData.itemCount}
                 </Text>
               </View>
@@ -206,16 +231,22 @@ export default function ScanModal() {
 
           {/* Ver detalhes button */}
           <Pressable
-            className="w-full rounded-xl bg-[#34d399] px-6 py-3.5"
+            className="w-full rounded-2xl bg-[#34d399] px-6 py-4"
             onPress={() => router.replace(`/receipt/${successData.receiptId}` as never)}
           >
-            <Text className="text-center text-base font-semibold text-[#0a0a0b]">
-              Ver detalhes
+            <Text className="text-center text-base font-semibold text-[#052e1f]">
+              Ver detalhes da nota
             </Text>
           </Pressable>
 
+          {/* Scan again */}
+          <Pressable onPress={() => { setScanState('idle'); setMode('choose'); }}>
+            <Text className="text-sm text-zinc-400">Escanear outra</Text>
+          </Pressable>
+
+          {/* Close */}
           <Pressable onPress={() => router.back()}>
-            <Text className="text-sm text-zinc-400">Fechar</Text>
+            <Text className="text-sm text-zinc-600">Fechar</Text>
           </Pressable>
         </View>
       </View>
