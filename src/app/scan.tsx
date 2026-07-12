@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
-import { ActivityIndicator, Animated, Alert, Easing, Pressable, View } from 'react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ActivityIndicator, Animated, Easing, Pressable, View } from 'react-native';
 import { router } from 'expo-router';
 import {
   Camera,
@@ -12,6 +12,7 @@ import {
 
 import { ManualEntryForm } from '@/components/ManualEntryForm';
 import { ScannerView } from '@/components/ScannerView';
+import { Toast } from '@/components/Toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
@@ -27,6 +28,7 @@ type ScanState = 'idle' | 'loading' | 'success';
 export default function ScanModal() {
   const [mode, setMode] = useState<ScanMode>('choose');
   const [scanState, setScanState] = useState<ScanState>('idle');
+  const [toast, setToast] = useState<{ title: string; message?: string; variant: 'error' | 'success' | 'info' } | null>(null);
   const [successData, setSuccessData] = useState<{
     receiptId: number;
     itemCount: number;
@@ -34,6 +36,18 @@ export default function ScanModal() {
     totalAmount: number;
   } | null>(null);
   const { isProcessing, setProcessing, setError, setPendingUrl } = useAppStore();
+
+  const dismissToast = useCallback(() => setToast(null), []);
+
+  const renderToast = () => (
+    <Toast
+      visible={!!toast}
+      title={toast?.title ?? ''}
+      message={toast?.message}
+      variant={toast?.variant ?? 'error'}
+      onDismiss={dismissToast}
+    />
+  );
 
   // Animated values (stable across renders)
   const scanLineAnim = useMemo(() => new Animated.Value(0), []);
@@ -87,13 +101,13 @@ export default function ScanModal() {
     if (isProcessing) return;
 
     if (!isNfceUrl(url)) {
-      Alert.alert('QR inválido', 'Este QR code não parece ser de uma nota fiscal.');
+      setToast({ title: 'QR inválido', message: 'Este QR code não parece ser de uma nota fiscal.', variant: 'error' });
       return;
     }
 
     const info = parseNfceUrl(url);
     if (!info) {
-      Alert.alert('Erro', 'Não foi possível ler a chave de acesso do QR code.');
+      setToast({ title: 'Erro', message: 'Não foi possível ler a chave de acesso do QR code.', variant: 'error' });
       return;
     }
 
@@ -114,7 +128,7 @@ export default function ScanModal() {
 
       if (!qrData) {
         setScanState('idle');
-        Alert.alert('QR não encontrado', 'Não foi possível detectar um QR code na imagem.');
+        setToast({ title: 'QR não encontrado', message: 'Não foi possível detectar um QR code na imagem.', variant: 'error' });
         return;
       }
 
@@ -123,7 +137,7 @@ export default function ScanModal() {
     } catch (e) {
       setScanState('idle');
       const msg = e instanceof Error ? e.message : 'Erro ao processar imagem';
-      Alert.alert('Erro', msg);
+      setToast({ title: 'Erro', message: msg, variant: 'error' });
     } finally {
       setProcessing(false);
     }
@@ -158,7 +172,7 @@ export default function ScanModal() {
       setScanState('idle');
       const msg = e instanceof Error ? e.message : 'Erro ao salvar';
       setError(msg);
-      Alert.alert('Erro', msg);
+      setToast({ title: 'Erro', message: msg, variant: 'error' });
     } finally {
       setProcessing(false);
     }
@@ -168,6 +182,7 @@ export default function ScanModal() {
   if (scanState === 'loading') {
     return (
       <View className="flex-1 items-center justify-center bg-[#0a0a0b]">
+        {renderToast()}
         <View className="items-center gap-4">
           <ActivityIndicator size="large" color="#34d399" />
           <Text className="text-base text-zinc-300">Processando nota fiscal...</Text>
@@ -181,6 +196,7 @@ export default function ScanModal() {
   if (scanState === 'success' && successData) {
     return (
       <View className="flex-1 items-center bg-[#0a0a0b] px-6 pt-24">
+        {renderToast()}
         <View className="w-full items-center gap-5">
           {/* Green checkmark circle */}
           <View className="h-[74px] w-[74px] items-center justify-center rounded-full bg-[#34d399]/15">
@@ -261,6 +277,7 @@ export default function ScanModal() {
   if (mode === 'choose') {
     return (
       <View className="flex-1 bg-[#0a0a0b]">
+      {renderToast()}
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 pb-4 pt-14">
           <Text className="text-xl font-bold text-white">Adicionar Nota</Text>
@@ -331,6 +348,7 @@ export default function ScanModal() {
   if (mode === 'camera') {
     return (
       <View className="flex-1 bg-[#0a0a0b]">
+      {renderToast()}
         {/* Header */}
         <View className="flex-row items-center justify-between px-4 pb-3 pt-14">
           <Pressable
@@ -413,6 +431,7 @@ export default function ScanModal() {
   // Manual mode
   return (
     <View className="flex-1 bg-[#0a0a0b]">
+      {renderToast()}
       {/* Header */}
       <View className="flex-row items-center justify-between px-4 pb-3 pt-14">
         <Pressable
