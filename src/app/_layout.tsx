@@ -42,8 +42,8 @@ function AppContent() {
         name="scan"
         options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
       />
-      <Stack.Screen name="product/[id]" options={{ title: 'Produto' }} />
-      <Stack.Screen name="receipt/[id]" options={{ title: 'Nota Fiscal' }} />
+      <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="receipt/[id]" options={{ headerShown: false }} />
     </Stack>
   );
 }
