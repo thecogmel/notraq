@@ -14,15 +14,15 @@ export default function StoresScreen() {
     { id: number; name: string; cnpj: string | null; address: string | null }[]
   >([]);
 
+  async function loadStores() {
+    setStoreList(await db.select().from(stores).orderBy(desc(stores.createdAt)));
+  }
+
   useFocusEffect(
     useCallback(() => {
       loadStores();
     }, [])
   );
-
-  async function loadStores() {
-    setStoreList(await db.select().from(stores).orderBy(desc(stores.createdAt)));
-  }
 
   if (storeList.length === 0) {
     return (

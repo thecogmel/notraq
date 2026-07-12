@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { desc, eq } from 'drizzle-orm';
@@ -24,11 +24,7 @@ export default function ProductDetailScreen() {
   >([]);
   const [change, setChange] = useState<PriceChange | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, [productId]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     const [p] = await db.select().from(products).where(eq(products.id, productId)).limit(1);
     if (!p) return;
     setProduct(p);
@@ -52,7 +48,11 @@ export default function ProductDetailScreen() {
       }))
     );
     setChange(await calculatePriceChange(productId));
-  }
+  }, [productId]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   if (!product) return null;
 

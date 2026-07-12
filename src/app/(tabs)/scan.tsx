@@ -41,7 +41,7 @@ export default function ScanScreen() {
 
   const handleManualSubmit = async (data: {
     storeName: string;
-    items: Array<{ name: string; price: string; quantity: string }>;
+    items: { name: string; price: string; quantity: string }[];
   }) => {
     setProcessing(true);
     try {

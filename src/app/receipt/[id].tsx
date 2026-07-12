@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { eq } from 'drizzle-orm';
@@ -21,11 +21,7 @@ export default function ReceiptDetailScreen() {
     { name: string; quantity: number; unitPrice: number; total: number }[]
   >([]);
 
-  useEffect(() => {
-    loadReceipt();
-  }, [receiptId]);
-
-  async function loadReceipt() {
+  const loadReceipt = useCallback(async () => {
     const [receipt] = await db.select().from(receipts).where(eq(receipts.id, receiptId)).limit(1);
     if (!receipt) return;
 
@@ -46,7 +42,11 @@ export default function ReceiptDetailScreen() {
       .where(eq(priceEntries.receiptId, receiptId));
 
     setItems(entries);
-  }
+  }, [receiptId]);
+
+  useEffect(() => {
+    loadReceipt();
+  }, [loadReceipt]);
 
   return (
     <ScrollView className="flex-1 bg-background">

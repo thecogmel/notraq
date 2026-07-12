@@ -1,11 +1,13 @@
-const { defineConfig } = require('eslint/config');
 const expoConfig = require('eslint-config-expo/flat');
 const prettierConfig = require('eslint-config-prettier');
+const reactCompiler = require('eslint-plugin-react-compiler');
 
-module.exports = defineConfig([
+module.exports = [
   ...expoConfig,
   prettierConfig,
   {
+    files: ['**/*.{ts,tsx}'],
+    plugins: { 'react-compiler': reactCompiler },
     rules: {
       '@typescript-eslint/no-unused-vars': [
         'warn',
@@ -16,7 +18,8 @@ module.exports = defineConfig([
         },
       ],
       '@typescript-eslint/no-explicit-any': 'off',
-      'react/jsx-fragments': ['error', 'syntax'],
+      'react-compiler/react-compiler': 'warn',
+      'react-hooks/set-state-in-effect': 'warn',
     },
   },
   {
@@ -28,4 +31,4 @@ module.exports = defineConfig([
   {
     ignores: ['node_modules/', '.expo/', 'dist/', 'android/', 'ios/'],
   },
-]);
+];

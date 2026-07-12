@@ -173,7 +173,7 @@ export function parseWebViewResult(
  */
 export function createManualReceipt(input: {
   storeName: string;
-  items: Array<{ name: string; unit: string; quantity: number; unitPrice: number }>;
+  items: { name: string; unit: string; quantity: number; unitPrice: number }[];
 }): NfceReceipt {
   const items: NfceItem[] = input.items.map((item) => ({
     code: '',

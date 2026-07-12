@@ -22,12 +22,6 @@ export default function ProductsScreen() {
   const [items, setItems] = useState<ProductWithPrice[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadProducts();
-    }, [])
-  );
-
   async function loadProducts() {
     setLoading(true);
     const allProducts = await db.select().from(products).orderBy(desc(products.createdAt));
@@ -50,6 +44,12 @@ export default function ProductsScreen() {
     setItems(withPrices);
     setLoading(false);
   }
+
+  useFocusEffect(
+    useCallback(() => {
+      loadProducts();
+    }, [])
+  );
 
   if (!loading && items.length === 0) {
     return (
