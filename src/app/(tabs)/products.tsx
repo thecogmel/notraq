@@ -181,14 +181,14 @@ export default function ProductsScreen() {
       <Text className="mb-4 text-[27px] font-semibold tracking-tight text-white">Produtos</Text>
 
       {/* Search Bar */}
-      <View className="mb-4 flex-row items-center gap-2.5 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
+      <View className="mb-4 flex-row items-center gap-2.5 rounded-[14px] border border-zinc-800 bg-[#18181b] px-[13px] py-[11px]">
         <Search size={18} color="#71717a" />
         <TextInput
           value={search}
           onChangeText={setSearch}
           placeholder="Buscar produto…"
           placeholderTextColor="#52525b"
-          className="flex-1 text-sm text-white"
+          className="flex-1 p-0 text-sm text-white"
           autoCapitalize="none"
           autoCorrect={false}
         />
