@@ -51,15 +51,19 @@ async function upsertStore(name: string, cnpj: string, address: string): Promise
 }
 
 async function upsertProduct(name: string, unit: string): Promise<number> {
-  const normalized = name.toUpperCase().trim();
-  const [existing] = await db
-    .select()
-    .from(products)
-    .where(eq(products.name, normalized))
-    .limit(1);
+  const normalized = name.trim();
+  const upper = normalized.toUpperCase();
 
-  if (existing) return existing.id;
+  // Case-insensitive match
+  const allProducts = await db.select().from(products);
+  const match = allProducts.find((p) => p.name.toUpperCase() === upper);
+  if (match) return match.id;
 
-  const [product] = await db.insert(products).values({ name: normalized, unit }).returning();
+  // Save as Title Case
+  const titleCase = normalized
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+
+  const [product] = await db.insert(products).values({ name: titleCase, unit }).returning();
   return product.id;
 }
