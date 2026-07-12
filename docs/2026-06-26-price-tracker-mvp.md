@@ -2,14 +2,16 @@
 
 **Objetivo:** App mobile que escaneia QR codes de NFC-e (cupons fiscais brasileiros), extrai dados de produtos, armazena histórico de preços localmente e mostra evolução de preços com alertas de variação.
 
-**Arquitetura:** App Expo com roteamento por arquivos (Expo Router). Banco SQLite local via expo-sqlite + Drizzle ORM. Scanner de QR code via câmera alimenta um parser que extrai dados dos produtos. Gráficos via react-native-gifted-charts. Estado global com Zustand. Componentes UI do React Native Reusables (modelo shadcn) estilizados com NativeWind/Tailwind CSS.
+**Arquitetura:** App Expo com roteamento por arquivos (Expo Router). Banco SQLite local via expo-sqlite + Drizzle ORM. Scanner de QR code via câmera alimenta um WebView (consulta SEFAZ com captcha manual) que extrai dados via injeção de JS. Gráficos SVG customizados. Estado global com Zustand. Componentes UI do React Native Reusables (modelo shadcn) estilizados com NativeWind/Tailwind CSS.
 
 **Stack:**
 - Expo 56, React Native 0.85, Expo Router
 - React Native Reusables + NativeWind (UI — modelo shadcn/ui)
 - expo-sqlite + Drizzle ORM (banco local)
 - expo-camera (scan de QR code)
-- react-native-gifted-charts (gráficos de evolução)
+- react-native-webview (consulta SEFAZ com captcha)
+- react-native-svg (gráficos customizados)
+- react-native-currency-input (máscara de preço R$)
 - Zustand (estado global)
 - date-fns (formatação de datas)
 
@@ -22,200 +24,112 @@
 ```
 src/
 ├── app/
-│   ├── _layout.tsx                # Layout raiz: providers (DB, NativeWind, SafeArea)
+│   ├── _layout.tsx                # Layout raiz: migrations, StatusBar
 │   ├── (tabs)/
-│   │   ├── _layout.tsx            # Tab navigator (Produtos, Scan, Mercados)
-│   │   ├── index.tsx              # Lista de produtos (home)
-│   │   ├── scan.tsx               # Scan QR + entrada manual
-│   │   └── stores.tsx             # Lista de mercados
-│   ├── product/[id].tsx           # Detalhe do produto + gráfico de preços
-│   └── receipt/[id].tsx           # Detalhe da nota (itens de um scan)
+│   │   ├── _layout.tsx            # Tab navigator (Início, Produtos, Mercados)
+│   │   ├── index.tsx              # Home/Dashboard
+│   │   ├── products.tsx           # Lista de produtos (busca, filtros, sparklines)
+│   │   └── markets.tsx            # Lista de mercados
+│   ├── scan.tsx                   # Modal: QR scan + importar foto + manual
+│   ├── nfce-webview.tsx           # WebView para consulta SEFAZ (captcha)
+│   ├── product/[id].tsx           # Detalhe do produto + gráfico + onde encontrar
+│   ├── receipt/[id].tsx           # Detalhe da nota (itens, total, delete)
+│   └── market/[id].tsx            # Detalhe do mercado (edit, delete, compras)
 ├── components/
-│   ├── ui/                        # Componentes RNR (instalados via CLI)
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── input.tsx
-│   │   ├── label.tsx
-│   │   ├── separator.tsx
-│   │   └── text.tsx
-│   ├── ProductCard.tsx            # Item de produto com indicador de variação
-│   ├── PriceChart.tsx             # Wrapper do gráfico de linha
-│   ├── ScannerView.tsx            # Componente de câmera QR
-│   ├── ManualEntryForm.tsx        # Formulário de entrada manual
-│   ├── PriceChangeAlert.tsx       # Badge de alerta % variação
-│   └── EmptyState.tsx             # Placeholder de estado vazio
+│   ├── ui/                        # RNR (button, card, input, label, separator, text, icon)
+│   ├── EmptyState.tsx
+│   ├── ManualEntryForm.tsx        # Formulário com autocomplete (loja + produto)
+│   ├── PriceChangeAlert.tsx
+│   ├── PriceChart.tsx             # SVG customizado (área + linha + pontos)
+│   ├── ProductCard.tsx
+│   ├── ScannerView.tsx
+│   └── Toast.tsx                  # Notificações inline (substitui Alert nativo)
 ├── db/
-│   ├── schema.ts                  # Schema Drizzle (products, stores, prices, receipts)
-│   ├── client.ts                  # Inicialização do DB + migrations
-│   └── migrations/                # SQL migrations geradas
+│   ├── schema.ts                  # Drizzle: stores, products, receipts, price_entries
+│   ├── client.ts                  # Singleton db + useDatabaseMigrations
+│   └── migrations/
 ├── services/
-│   ├── nfce-parser.ts             # Parse de URL NFC-e, fetch + extração de itens
-│   ├── price-analyzer.ts          # Cálculo de variações, percentuais, alertas
-│   └── receipt-ingestion.ts       # Liga parser ao DB (upsert produtos, lojas, preços)
+│   ├── image-scanner.ts           # Picker galeria + Camera.scanFromURLAsync
+│   ├── nfce-parser.ts            # Script JS para WebView + parseWebViewResult
+│   ├── nfce-url.ts              # Parse URL QR, chave acesso, UF, buildConsultaUrl
+│   ├── price-analyzer.ts         # Histórico, cálculo variação %
+│   └── receipt-ingestion.ts      # Upsert store/product/prices (Title Case, dedup)
 ├── store/
-│   └── app-store.ts               # Zustand store (estado do scan, UI)
+│   └── app-store.ts              # Zustand (isProcessing, pendingUrl, etc)
 ├── lib/
-│   ├── utils.ts                   # Helper cn() para merge de classes NativeWind
-│   └── theme.ts                   # Tema de navegação (light/dark)
+│   ├── utils.ts                  # cn()
+│   └── theme.ts                  # NAV_THEME
 ├── assets/
-│   └── images/
 └── types/
-    └── index.ts                   # Types TypeScript compartilhados
+    └── index.ts                  # NfceItem, NfceReceipt, PriceChange, etc
 ```
 
 ---
 
-## Task 1: Scaffolding do Projeto
+## Progresso
 
-- [x] **Step 1:** Criar projeto Expo com template RNR (Minimal Nativewind)
-- [x] **Step 2:** Instalar NativeWind + dependências (reanimated, safe-area-context)
-- [x] **Step 3:** Instalar dependências core (expo-sqlite, drizzle-orm, zustand, date-fns, gifted-charts, expo-camera)
-- [x] **Step 4:** Inicializar React Native Reusables + instalar componentes (button, card, input, label, separator, text)
-- [x] **Step 5:** Configurar Tailwind (tema de cores semânticas, darkMode, tailwindcss-animate)
-- [x] **Step 6:** Criar global.css (variáveis CSS light/dark com tema blue-based)
-- [x] **Step 7:** Configurar babel.config.js (jsxImportSource nativewind + inline-import .sql)
-- [x] **Step 8:** Configurar metro.config.js (withNativeWind)
-- [x] **Step 9:** Criar root layout com providers (ThemeProvider, PortalHost)
-- [x] **Step 10:** Reorganizar para estrutura src/ com aliases (@/* -> ./src/*)
-- [x] **Step 11:** Configurar ESLint (flat config + expo + prettier) e Prettier (import sorting + tailwind)
-- [x] **Step 12:** Verificar app roda no Android
-- [x] **Step 13:** Commit inicial
+### ✅ Task 1: Scaffolding do Projeto
+Expo 56 + NativeWind + RNR + estrutura src/ + ESLint/Prettier
 
----
+### ✅ Task 2: Schema do Banco & Client
+Drizzle ORM com 4 tabelas + migrations + provider
 
-## Task 2: Schema do Banco & Client
+### ✅ Task 3: Types & Parser NFC-e
+Types compartilhados + extração via WebView JS injection + manual fallback
 
-**Arquivos:**
-- Criar: `src/db/schema.ts`
-- Criar: `src/db/client.ts`
-- Criar: `drizzle.config.ts`
+### ✅ Task 4: Analisador de Preços & Ingestão
+Price analyzer (variação %) + receipt ingestion (upsert com Title Case + dedup)
 
-- [ ] **Step 1:** Criar schema Drizzle (stores, products, receipts, priceEntries)
-- [ ] **Step 2:** Criar client do banco com provider + hook useDatabaseMigrations
-- [ ] **Step 3:** Criar drizzle.config.ts
-- [ ] **Step 4:** Gerar migration inicial (`pnpm db:generate`)
-- [ ] **Step 5:** Commit
+### ✅ Task 5: Scanner QR + Entrada Manual
+Câmera, importar foto (galeria), formulário manual com autocomplete + máscara R$
 
----
+### ✅ Task 6: Telas de Listagem
+Dashboard (stats, alertas, últimas compras) + Produtos (busca, filtros, sparklines)
 
-## Task 3: Types & Parser de NFC-e
+### ✅ Task 7: Detalhe do Produto
+Gráfico SVG + stats 2x2 + "Onde encontrar" + trend badge
 
-**Arquivos:**
-- Criar: `src/types/index.ts`
-- Criar: `src/services/nfce-parser.ts`
+### ✅ Task 8: Tabs + Mercados + Notas
+3 tabs (Início, Produtos, Mercados) + detalhe mercado (edit, delete) + detalhe nota (delete)
 
-- [ ] **Step 1:** Definir types compartilhados (NfceItem, NfceReceipt, PriceChange)
-- [ ] **Step 2:** Criar parser de NFC-e (fetch HTML + extração de itens via regex)
-- [ ] **Step 3:** Commit
+### ✅ Task 9: WebView NFC-e
+Consulta SEFAZ via WebView + captcha manual + extração de dados do DOM
+
+### ✅ Task 10: Design System
+Pixel-perfect dark mode baseado no Claude Design handoff + componentes RNR atualizados
 
 ---
 
-## Task 4: Analisador de Preços & Ingestão de Notas
+## Funcionalidades Implementadas
 
-**Arquivos:**
-- Criar: `src/services/price-analyzer.ts`
-- Criar: `src/services/receipt-ingestion.ts`
-
-- [ ] **Step 1:** Criar analisador de preços (histórico, cálculo de variação %)
-- [ ] **Step 2:** Criar serviço de ingestão (upsert loja, produto, price entry)
-- [ ] **Step 3:** Commit
-
----
-
-## Task 5: Tela de Scanner QR
-
-**Arquivos:**
-- Criar: `src/components/ScannerView.tsx`
-- Criar: `src/components/ManualEntryForm.tsx`
-- Criar: `src/store/app-store.ts`
-- Criar: `src/app/(tabs)/scan.tsx`
-
-- [ ] **Step 1:** Criar Zustand store (isProcessing, lastError)
-- [ ] **Step 2:** Criar ScannerView (câmera + permissão)
-- [ ] **Step 3:** Criar ManualEntryForm (entrada manual de produto/preço)
-- [ ] **Step 4:** Criar tela Scan com toggle QR/Manual
-- [ ] **Step 5:** Commit
-
----
-
-## Task 6: Tela de Lista de Produtos (Home)
-
-**Arquivos:**
-- Criar: `src/components/ProductCard.tsx`
-- Criar: `src/components/PriceChangeAlert.tsx`
-- Criar: `src/components/EmptyState.tsx`
-- Criar: `src/app/(tabs)/index.tsx`
-
-- [ ] **Step 1:** Criar PriceChangeAlert (badge ↑/↓ com %)
-- [ ] **Step 2:** Criar ProductCard (nome, preço, variação)
-- [ ] **Step 3:** Criar EmptyState
-- [ ] **Step 4:** Criar tela de listagem com FlatList
-- [ ] **Step 5:** Commit
-
----
-
-## Task 7: Tela de Detalhe do Produto com Gráfico
-
-**Arquivos:**
-- Criar: `src/components/PriceChart.tsx`
-- Criar: `src/app/product/[id].tsx`
-
-- [ ] **Step 1:** Criar PriceChart (LineChart com área, curved, labels pt-BR)
-- [ ] **Step 2:** Criar tela de detalhe (info + gráfico + histórico por loja)
-- [ ] **Step 3:** Commit
-
----
-
-## Task 8: Tab Navigator, Mercados & Detalhe de Nota
-
-**Arquivos:**
-- Criar: `src/app/(tabs)/_layout.tsx`
-- Criar: `src/app/(tabs)/stores.tsx`
-- Criar: `src/app/receipt/[id].tsx`
-
-- [ ] **Step 1:** Criar Tab layout (Produtos, Escanear, Mercados) com ícones Lucide
-- [ ] **Step 2:** Criar tela de Mercados (lista de lojas)
-- [ ] **Step 3:** Criar tela de Detalhe da Nota (itens + total)
-- [ ] **Step 4:** Commit
-
----
-
-## Task 9: Configuração Final & Integração
-
-**Arquivos:**
-- Modificar: `app.json`
-- Modificar: `src/app/_layout.tsx`
-
-- [ ] **Step 1:** Atualizar app.json (plugin expo-camera com permissão em pt-BR, bundleIdentifier)
-- [ ] **Step 2:** Atualizar root layout para rodar migrations na inicialização
-- [ ] **Step 3:** Teste completo do fluxo
-- [ ] **Step 4:** Commit final
-
----
-
-## Resumo
-
-| Task | Descrição | Tempo Estimado |
-|------|-----------|---------------|
-| 1 | Scaffolding (Expo + NativeWind + RNR) | ✅ Concluído |
-| 2 | Schema do banco + Drizzle | 15 min |
-| 3 | Types + parser NFC-e | 20 min |
-| 4 | Analisador de preços + ingestão | 15 min |
-| 5 | Tela de scanner QR | 25 min |
-| 6 | Lista de produtos (home) | 20 min |
-| 7 | Detalhe do produto + gráfico | 20 min |
-| 8 | Tabs + mercados + detalhe nota | 20 min |
-| 9 | Config final + integração | 10 min |
-| **Total restante** | | **~2.5 horas** |
+- ✅ Scan QR code via câmera
+- ✅ Importar foto da galeria (detecta QR)
+- ✅ Consulta NFC-e via WebView (captcha manual + extração JS)
+- ✅ Entrada manual com autocomplete (mercado + produto)
+- ✅ Máscara de preço R$ (react-native-currency-input)
+- ✅ Dashboard com stats, alertas e últimas compras
+- ✅ Lista de produtos com busca, filtros e sparklines SVG
+- ✅ Detalhe do produto com gráfico SVG + stats + "Onde encontrar"
+- ✅ Detalhe da nota fiscal com variação de preço por item
+- ✅ Detalhe do mercado com edição + produtos mais comprados
+- ✅ Deletar notas e mercados (com confirmação)
+- ✅ Dark mode pixel-perfect (design handoff)
+- ✅ Toast customizado (sem Alert nativo)
+- ✅ Normalização de nomes (Title Case, dedup case-insensitive)
+- ✅ Limpeza automática de "RAZÃO SOCIAL:" dos nomes
 
 ---
 
 ## Melhorias Futuras (Pós-MVP)
 
 - Fuzzy matching de produtos (distância de Levenshtein)
+- Merge de mercados duplicados
 - Notificações push quando preço sobe acima de X%
 - Exportação de dados (CSV)
 - Comparativo entre mercados por produto
-- Busca/filtro de produtos
-- Toggle de dark mode
+- Busca/filtro de produtos por categoria
+- OCR de cupom fiscal (foto do papel)
+- Toggle de dark/light mode
 - Backup/sync com cloud (Supabase)
+- Edição de produtos (renomear, mudar unidade)
+- Histórico de gastos por período

@@ -12,8 +12,20 @@ Escaneie o QR code do cupom fiscal, acompanhe a evolução de preços dos produt
 - [React Native Reusables](https://reactnativereusables.com) (componentes UI — modelo shadcn)
 - [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/) + [Drizzle ORM](https://orm.drizzle.team/) (banco local)
 - [expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/) (scan de QR code)
-- [react-native-gifted-charts](https://github.com/nicolestandifer/react-native-gifted-charts) (gráficos)
+- [react-native-webview](https://github.com/nicolestandifer/react-native-webview) (consulta SEFAZ)
+- [react-native-svg](https://github.com/software-mansion/react-native-svg) (gráficos)
 - [Zustand](https://zustand-demo.pmnd.rs/) (estado global)
+
+## Funcionalidades
+
+- 📷 Scan de QR code via câmera ou importação de foto
+- 🌐 Consulta automática na SEFAZ via WebView (captcha manual)
+- ✍️ Entrada manual de produtos com autocomplete e máscara R$
+- 📊 Gráfico de evolução de preços (SVG customizado)
+- 🔔 Alertas de variação de preço (subindo/descendo)
+- 🏪 Gerenciamento de mercados (editar, excluir)
+- 🧾 Histórico de notas fiscais com detalhamento
+- 🔍 Busca e filtros de produtos (por tendência, preço, nome)
 
 ## Começando
 
@@ -21,7 +33,7 @@ Escaneie o QR code do cupom fiscal, acompanhe a evolução de preços dos produt
 # Instalar dependências
 pnpm install
 
-# Gerar nativos
+# Gerar nativos (necessário para camera e webview)
 pnpm prebuild
 
 # Rodar no Android
@@ -30,7 +42,7 @@ pnpm android
 # Rodar no iOS (Mac only)
 pnpm ios
 
-# Dev server (Expo Go)
+# Dev server
 pnpm start
 ```
 
@@ -51,16 +63,26 @@ pnpm start
 
 ```
 src/
-├── app/          # Rotas (Expo Router)
-├── components/   # Componentes React
-│   └── ui/       # Primitivos RNR (button, card, input...)
-├── db/           # Schema + client Drizzle
-├── services/     # Lógica de negócio (parser, analyzer)
-├── store/        # Estado global (Zustand)
-├── lib/          # Utilitários (cn, theme)
-├── types/        # TypeScript types
-└── assets/       # Imagens e recursos
+├── app/           # Rotas (Expo Router)
+├── components/    # Componentes React
+│   └── ui/        # Primitivos RNR (button, card, input...)
+├── db/            # Schema + client Drizzle
+├── services/      # Lógica de negócio (parser, analyzer, ingestion)
+├── store/         # Estado global (Zustand)
+├── lib/           # Utilitários (cn, theme)
+├── types/         # TypeScript types
+└── assets/        # Imagens e recursos
 ```
+
+## Design
+
+Dark mode por padrão. Design pixel-perfect baseado em mockup do Claude Design.
+
+- Background: `#09090b` (zinc-950)
+- Cards: `#18181b` com border `#27272a`
+- Accent: verde `#34d399`
+- Alerta de alta: vermelho `#f87171`
+- Font mono para números e preços
 
 ## Licença
 
