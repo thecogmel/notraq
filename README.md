@@ -14,7 +14,9 @@ Escaneie o QR code do cupom fiscal, acompanhe a evolução de preços dos produt
 - [expo-camera](https://docs.expo.dev/versions/latest/sdk/camera/) (scan de QR code)
 - [react-native-webview](https://github.com/nicolestandifer/react-native-webview) (consulta SEFAZ)
 - [react-native-svg](https://github.com/software-mansion/react-native-svg) (gráficos)
+- [react-native-currency-input](https://github.com/CaioQuirinoMedeiros/react-native-currency-input) (máscara R$)
 - [Zustand](https://zustand-demo.pmnd.rs/) (estado global)
+- Fonte: [Capriola](https://fonts.google.com/specimen/Capriola)
 
 ## Funcionalidades
 
@@ -26,6 +28,7 @@ Escaneie o QR code do cupom fiscal, acompanhe a evolução de preços dos produt
 - 🏪 Gerenciamento de mercados (editar, excluir)
 - 🧾 Histórico de notas fiscais com detalhamento
 - 🔍 Busca e filtros de produtos (por tendência, preço, nome)
+- 🗑️ Exclusão de notas e mercados com confirmação
 
 ## Começando
 
@@ -56,6 +59,10 @@ pnpm start
 | `pnpm web` | Dev server web |
 | `pnpm lint` | Type check + ESLint |
 | `pnpm format` | Formata com Prettier |
+| `pnpm test` | Testes unitários (Jest) |
+| `pnpm test:watch` | Testes em modo watch |
+| `pnpm e2e:build` | Build para E2E (Detox) |
+| `pnpm e2e:test` | Rodar testes E2E |
 | `pnpm prebuild` | Regenera pastas nativas |
 | `pnpm db:generate` | Gera migrations Drizzle |
 
@@ -69,10 +76,19 @@ src/
 ├── db/            # Schema + client Drizzle
 ├── services/      # Lógica de negócio (parser, analyzer, ingestion)
 ├── store/         # Estado global (Zustand)
-├── lib/           # Utilitários (cn, theme)
+├── lib/           # Utilitários (cn, formatBRL, getNameColor, toTitleCase)
 ├── types/         # TypeScript types
+├── __tests__/     # Testes unitários e de componentes
 └── assets/        # Imagens e recursos
+
+e2e/               # Testes E2E (Detox)
 ```
+
+## Testes
+
+- **Unitários (Jest):** Services (nfce-url, nfce-parser) + Utils (formatBRL, toTitleCase, getNameColor)
+- **Componentes (RNTL):** EmptyState, PriceChangeAlert, Toast, ConfirmDialog, Sparkline
+- **E2E (Detox):** Navegação entre tabs, fluxo completo de entrada manual
 
 ## Design
 
@@ -82,6 +98,7 @@ Dark mode por padrão. Design pixel-perfect baseado em mockup do Claude Design.
 - Cards: `#18181b` com border `#27272a`
 - Accent: verde `#34d399`
 - Alerta de alta: vermelho `#f87171`
+- Fonte: Capriola (Google Fonts)
 - Font mono para números e preços
 
 ## Licença
