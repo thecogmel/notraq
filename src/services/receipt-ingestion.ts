@@ -34,10 +34,17 @@ export async function ingestReceipt(data: NfceReceipt): Promise<number> {
 }
 
 async function upsertStore(name: string, cnpj: string, address: string): Promise<number> {
+  // Match by CNPJ first (most reliable)
   if (cnpj) {
     const [existing] = await db.select().from(stores).where(eq(stores.cnpj, cnpj)).limit(1);
     if (existing) return existing.id;
   }
+
+  // Match by exact name (case-insensitive via UPPER)
+  const normalized = name.toUpperCase().trim();
+  const allStores = await db.select().from(stores);
+  const match = allStores.find((s) => s.name.toUpperCase().trim() === normalized);
+  if (match) return match.id;
 
   const [store] = await db.insert(stores).values({ name, cnpj, address }).returning();
   return store.id;
