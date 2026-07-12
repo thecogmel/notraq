@@ -202,6 +202,16 @@ export default function ReceiptDetailScreen() {
             </View>
           ))}
         </View>
+
+        {/* Concluir */}
+        <Pressable
+          onPress={() => router.replace('/(tabs)' as never)}
+          className="mt-4 rounded-2xl bg-[#34d399] py-4"
+        >
+          <Text className="text-center text-base font-semibold text-[#052e1f]">
+            Concluir
+          </Text>
+        </Pressable>
       </View>
     </ScrollView>
   );
