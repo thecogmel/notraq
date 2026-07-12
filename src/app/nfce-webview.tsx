@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
-import { Alert, Pressable, View } from 'react-native';
+import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Download } from 'lucide-react-native';
 import { WebView, WebViewMessageEvent } from 'react-native-webview';
@@ -13,10 +13,17 @@ export default function NfceWebViewScreen() {
   const webViewRef = useRef<WebView>(null);
   const [canExtract, setCanExtract] = useState(false);
   const [extracting, setExtracting] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const handleLoadEnd = useCallback(() => {
-    // After page loads (user resolved captcha), show extract button
+    setLoading(false);
     setCanExtract(true);
+  }, []);
+
+  const handleError = useCallback(() => {
+    setLoading(false);
+    setError('Não foi possível carregar a página da SEFAZ. Verifique sua conexão.');
   }, []);
 
   const handleExtract = () => {
@@ -88,19 +95,46 @@ export default function NfceWebViewScreen() {
         <Text className="text-xs text-zinc-400">
           1. Resolva o captcha abaixo • 2. Aguarde a página carregar • 3. Toque em "Extrair dados"
         </Text>
+        {url && (
+          <Text className="mt-1 text-[10px] text-zinc-600" numberOfLines={1}>
+            {url}
+          </Text>
+        )}
       </View>
 
+      {/* Loading */}
+      {loading && (
+        <View className="absolute inset-0 top-32 items-center justify-center">
+          <ActivityIndicator size="large" color="#34d399" />
+          <Text className="mt-3 text-sm text-zinc-400">Carregando SEFAZ...</Text>
+        </View>
+      )}
+
+      {/* Error */}
+      {error && (
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-center text-sm text-zinc-400">{error}</Text>
+          <Pressable onPress={() => router.back()} className="mt-4 rounded-xl bg-zinc-800 px-5 py-3">
+            <Text className="text-sm text-white">Voltar</Text>
+          </Pressable>
+        </View>
+      )}
+
       {/* WebView */}
-      <WebView
-        ref={webViewRef}
-        source={{ uri: url ?? '' }}
-        onLoadEnd={handleLoadEnd}
-        onMessage={handleMessage}
-        className="flex-1"
-        style={{ flex: 1, backgroundColor: '#09090b' }}
-        javaScriptEnabled
-        domStorageEnabled
-      />
+      {!error && (
+        <WebView
+          ref={webViewRef}
+          source={{ uri: url ?? '' }}
+          onLoadEnd={handleLoadEnd}
+          onError={handleError}
+          onHttpError={handleError}
+          onMessage={handleMessage}
+          style={{ flex: 1, backgroundColor: '#09090b' }}
+          javaScriptEnabled
+          domStorageEnabled
+          startInLoadingState
+        />
+      )}
     </View>
   );
 }
