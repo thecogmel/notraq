@@ -1,126 +1,138 @@
 import type { NfceItem, NfceReceipt } from '@/types';
 
 /**
- * JavaScript a ser injetado no WebView após o usuário resolver o captcha.
- * Extrai os dados da página da NFC-e e retorna via window.ReactNativeWebView.postMessage().
- *
- * Compatível com o layout padrão da consulta pública da SEFAZ (maioria dos estados).
+ * JavaScript injetado no WebView para extrair dados da NFC-e.
+ * Funciona com tabelas estruturadas (SEFAZ/RN) e layouts variados.
  */
 export const EXTRACTION_SCRIPT = `
 (function() {
   try {
-    // Verifica se a página tem dados de NFC-e carregados
-    var tables = document.querySelectorAll('table, .NFCDetalhe, #tabResult, .txtTit');
-    if (tables.length === 0 && !document.querySelector('[class*="nfce"], [class*="NFCe"], [id*="nfce"]')) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({
-        success: false,
-        error: 'Página não contém dados de NFC-e. Resolva o captcha e aguarde carregar.'
-      }));
-      return;
-    }
+    var body = document.body.innerHTML;
+    var text = document.body.textContent || '';
 
     // ===== DADOS DA LOJA =====
     var storeName = '';
     var storeCnpj = '';
     var storeAddress = '';
 
-    // Tenta diferentes seletores (varia por estado)
-    var nameEl = document.querySelector('.txtTopo, .NFCCabecalho_Nome, #u20');
-    if (nameEl) storeName = nameEl.textContent.trim();
+    // CNPJ
+    var cnpjMatch = body.match(/CNPJ[:\\s]*([\\d.\\/-]+)/i);
+    if (cnpjMatch) storeCnpj = cnpjMatch[1].trim();
 
-    var cnpjEl = document.body.innerHTML.match(/CNPJ[:\\s]*([\\d.\\/-]+)/);
-    if (cnpjEl) storeCnpj = cnpjEl[1].trim();
+    // Razão social / nome
+    var razaoMatch = text.match(/(?:Raz[aã]o\\s*Social|Empresa|Emitente)[:\\s]*([^\\n]+)/i);
+    if (razaoMatch) storeName = razaoMatch[1].trim();
 
-    var addrEl = document.querySelector('.txtEndereco, .NFCCabecalho_Endereco');
-    if (addrEl) storeAddress = addrEl.textContent.trim();
+    if (!storeName) {
+      // Fallback: buscar texto bold no topo
+      var bolds = document.querySelectorAll('b, strong, h3, h4, .txtTopo');
+      for (var b = 0; b < bolds.length; b++) {
+        var bt = bolds[b].textContent.trim();
+        if (bt.length > 3 && bt.length < 80 && !bt.match(/DANFE|NFC-e|GOVERNO|NOTA FISCAL|SECRETARIA|N.MERO|SERIE/i)) {
+          storeName = bt;
+          break;
+        }
+      }
+    }
+
+    // Endereço
+    var addrMatch = text.match(/(?:Endere[cç]o|Logradouro)[:\\s]*([^\\n]+)/i);
+    if (addrMatch) storeAddress = addrMatch[1].trim();
 
     // ===== ITENS =====
     var items = [];
+    var tables = document.querySelectorAll('table');
 
-    // Padrão 1: Tabela com linhas de produto (mais comum)
-    var rows = document.querySelectorAll('tr[id*="Item"], .NFCDetalhe_Item, table.toggable tr');
-    
-    if (rows.length > 0) {
-      rows.forEach(function(row) {
-        var cells = row.querySelectorAll('td, span');
-        var text = row.textContent;
-        
-        var nameMatch = text.match(/(?:^|\\d{5,})\\s*(.+?)(?:\\s+\\d)/);
-        var codeMatch = text.match(/(\\d{3,7})/);
-        var qtyMatch = text.match(/(?:Qtde|Qt)[.:]?\\s*([\\d.,]+)/i);
-        var unitMatch = text.match(/(?:UN|KG|LT|ML|MT|PC|CX|DZ|GR)/i);
-        var unitPriceMatch = text.match(/(?:Vl\\.?\\s*Unit|V\\.Unit)[.:]?\\s*R?\\$?\\s*([\\d.,]+)/i);
-        var totalMatch = text.match(/(?:Vl\\.?\\s*Total|V\\.Total)[.:]?\\s*R?\\$?\\s*([\\d.,]+)/i);
+    for (var ti = 0; ti < tables.length; ti++) {
+      var trows = tables[ti].querySelectorAll('tr');
+      if (trows.length < 2) continue;
 
-        if (nameMatch || (cells.length >= 3)) {
-          var item = {
-            code: codeMatch ? codeMatch[1] : '',
-            name: '',
-            unit: unitMatch ? unitMatch[0].toUpperCase() : 'UN',
-            quantity: qtyMatch ? parseFloat(qtyMatch[1].replace(/\\./g, '').replace(',', '.')) : 1,
-            unitPrice: unitPriceMatch ? parseFloat(unitPriceMatch[1].replace(/\\./g, '').replace(',', '.')) : 0,
-            totalPrice: totalMatch ? parseFloat(totalMatch[1].replace(/\\./g, '').replace(',', '.')) : 0,
-          };
+      // Checar se é tabela de itens pelo header
+      var headerText = trows[0].textContent.toLowerCase();
+      var isItemTable = (headerText.match(/descri|produto/) && headerText.match(/qtd|quant|unit|valor/));
+      if (!isItemTable) continue;
 
-          // Extrai nome dos cells ou do match
-          if (cells.length >= 2) {
-            item.name = (cells[1] || cells[0]).textContent.trim().replace(/\\s+/g, ' ');
-          } else if (nameMatch) {
-            item.name = nameMatch[1].trim();
-          }
+      // Mapear colunas
+      var hCells = trows[0].querySelectorAll('th, td');
+      var col = { code:-1, name:-1, qty:-1, unit:-1, unitPrice:-1, total:-1 };
 
-          if (item.name && (item.unitPrice > 0 || item.totalPrice > 0)) {
-            if (!item.unitPrice && item.totalPrice) item.unitPrice = item.totalPrice / item.quantity;
-            if (!item.totalPrice && item.unitPrice) item.totalPrice = item.unitPrice * item.quantity;
-            items.push(item);
-          }
-        }
-      });
-    }
+      for (var ci = 0; ci < hCells.length; ci++) {
+        var h = hCells[ci].textContent.toLowerCase().trim();
+        if (h.match(/^c[oó]d/)) col.code = ci;
+        else if (h.match(/descri|produto/)) col.name = ci;
+        else if (h.match(/qtd|quant/)) col.qty = ci;
+        else if (h.match(/^un$|^unid/)) col.unit = ci;
+        else if (h.match(/unit|vl\\.?\\s*unit|v\\.?\\s*unit/)) col.unitPrice = ci;
+        else if (h.match(/total|v\\.?\\s*total|subtotal/)) col.total = ci;
+      }
 
-    // Padrão 2: Spans com classes txtTit/Rqtd/RvlUnit (layout RN/outros)
-    if (items.length === 0) {
-      var blocks = document.querySelectorAll('.txtTit, [class*="txtTit"]');
-      blocks.forEach(function(block) {
-        var container = block.closest('tr, div, li') || block.parentElement;
-        var text = container ? container.textContent : block.textContent;
-        
-        var name = block.textContent.trim();
-        var qtyMatch = text.match(/(?:Qtde|Qt)[.:]?\\s*([\\d.,]+)/i);
-        var unitMatch = text.match(/(?:UN|KG|LT|ML|MT|PC|CX|DZ|GR)/i);
-        var unitPriceMatch = text.match(/(?:Vl\\.?\\s*Unit|V\\.Unit)[.:]?\\s*R?\\$?\\s*([\\d.,]+)/i);
-        var totalMatch = text.match(/(?:Vl\\.?\\s*Total|V\\.Total|Valor)[.:]?\\s*R?\\$?\\s*([\\d.,]+)/i);
+      // Fallback posicional se não achou por nome
+      if (col.name === -1 && hCells.length >= 5) {
+        col.code = 0; col.name = 1; col.qty = 2; col.unit = 3; col.unitPrice = 4;
+        col.total = hCells.length >= 7 ? 6 : 5;
+      }
+      if (col.name === -1) continue;
 
-        if (name && name.length > 2) {
+      // Extrair linhas
+      for (var ri = 1; ri < trows.length; ri++) {
+        var cells = trows[ri].querySelectorAll('td');
+        if (cells.length < 3) continue;
+
+        var name = col.name >= 0 && cells[col.name] ? cells[col.name].textContent.trim() : '';
+        if (!name || name.length < 2) continue;
+
+        var pn = function(s) { return parseFloat((s||'0').replace(/[^\\d.,]/g,'').replace(/\\./g,'').replace(',','.')) || 0; };
+
+        var qty = col.qty >= 0 && cells[col.qty] ? pn(cells[col.qty].textContent) : 1;
+        var unit = col.unit >= 0 && cells[col.unit] ? cells[col.unit].textContent.trim().toUpperCase() : 'UN';
+        var unitPrice = col.unitPrice >= 0 && cells[col.unitPrice] ? pn(cells[col.unitPrice].textContent) : 0;
+        var totalPrice = col.total >= 0 && cells[col.total] ? pn(cells[col.total].textContent) : 0;
+
+        if (!unitPrice && totalPrice) unitPrice = totalPrice / (qty || 1);
+        if (!totalPrice && unitPrice) totalPrice = unitPrice * qty;
+
+        if (unitPrice > 0 || totalPrice > 0) {
           items.push({
-            code: '',
-            name: name.replace(/\\s+/g, ' '),
-            unit: unitMatch ? unitMatch[0].toUpperCase() : 'UN',
-            quantity: qtyMatch ? parseFloat(qtyMatch[1].replace(/\\./g, '').replace(',', '.')) : 1,
-            unitPrice: unitPriceMatch ? parseFloat(unitPriceMatch[1].replace(/\\./g, '').replace(',', '.')) : 0,
-            totalPrice: totalMatch ? parseFloat(totalMatch[1].replace(/\\./g, '').replace(',', '.')) : 0,
+            code: col.code >= 0 && cells[col.code] ? cells[col.code].textContent.trim().replace(/\\D/g,'') : '',
+            name: name,
+            unit: unit || 'UN',
+            quantity: qty || 1,
+            unitPrice: unitPrice,
+            totalPrice: totalPrice,
           });
         }
-      });
+      }
+
+      if (items.length > 0) break;
     }
 
     // ===== TOTAIS =====
-    var totalText = document.body.innerHTML;
-    var totalMatch = totalText.match(/(?:Valor\\s*(?:Total|a\\s*Pagar)|TOTAL)[^\\d]*R?\\$?\\s*([\\d.,]+)/i);
-    var totalAmount = totalMatch ? parseFloat(totalMatch[1].replace(/\\./g, '').replace(',', '.')) : 0;
-    
+    var totalMatch = text.match(/Valor\\s*Total\\s*(?:dos\\s*Produtos|R\\$)?[^\\d]*([\\d.,]+)/i);
+    var totalAmount = totalMatch ? parseFloat(totalMatch[1].replace(/\\./g,'').replace(',','.')) : 0;
+    if (!totalAmount) {
+      var pagoMatch = text.match(/Valor\\s*Pago[^\\d]*([\\d.,]+)/i);
+      if (pagoMatch) totalAmount = parseFloat(pagoMatch[1].replace(/\\./g,'').replace(',','.'));
+    }
     if (!totalAmount && items.length > 0) {
-      totalAmount = items.reduce(function(sum, i) { return sum + i.totalPrice; }, 0);
+      totalAmount = items.reduce(function(s,i){ return s + i.totalPrice; }, 0);
     }
 
-    var discountMatch = totalText.match(/(?:Desconto)[^\\d]*R?\\$?\\s*([\\d.,]+)/i);
-    var discountAmount = discountMatch ? parseFloat(discountMatch[1].replace(/\\./g, '').replace(',', '.')) : 0;
+    var discMatch = text.match(/Desconto[^\\d]*([\\d.,]+)/i);
+    var discountAmount = discMatch ? parseFloat(discMatch[1].replace(/\\./g,'').replace(',','.')) : 0;
 
     // ===== DATA =====
-    var dateMatch = totalText.match(/(\\d{2}\\/\\d{2}\\/\\d{4})\\s*(\\d{2}:\\d{2}(?::\\d{2})?)/);
+    var dateMatch = text.match(/(\\d{2}\\/\\d{2}\\/\\d{4})\\s*(\\d{2}:\\d{2}(?::\\d{2})?)/);
     var purchaseDate = dateMatch ? dateMatch[1] + ' ' + dateMatch[2] : '';
 
     // ===== RESULTADO =====
+    if (items.length === 0) {
+      window.ReactNativeWebView.postMessage(JSON.stringify({
+        success: false,
+        error: 'Nenhum item encontrado. Verifique se a nota carregou completamente.'
+      }));
+      return;
+    }
+
     window.ReactNativeWebView.postMessage(JSON.stringify({
       success: true,
       data: {
@@ -136,7 +148,7 @@ export const EXTRACTION_SCRIPT = `
   } catch (e) {
     window.ReactNativeWebView.postMessage(JSON.stringify({
       success: false,
-      error: 'Erro ao extrair dados: ' + e.message
+      error: 'Erro ao extrair: ' + e.message
     }));
   }
 })();
@@ -177,7 +189,7 @@ export function createManualReceipt(input: {
 }): NfceReceipt {
   const items: NfceItem[] = input.items.map((item) => ({
     code: '',
-    name: item.name.toUpperCase().trim(),
+    name: item.name.trim(),
     unit: item.unit || 'UN',
     quantity: item.quantity,
     unitPrice: item.unitPrice,
