@@ -275,7 +275,7 @@ export default function MarketDetailScreen() {
         {/* Stats: notas + total gasto */}
         <View className="mt-4 flex-row gap-2.5">
           <View className="flex-1 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
-            <Text className="text-[11px] text-zinc-500">Notas escaneadas</Text>
+            <Text className="text-[11px] text-zinc-500">Notas</Text>
             <Text className="mt-1 font-mono text-xl font-semibold text-white">
               {data.receiptCount}
             </Text>
