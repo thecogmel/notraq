@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { desc, eq, sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Pencil, Receipt, Store, X } from 'lucide-react-native';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { priceEntries, products, receipts, stores } from '@/db/schema';
@@ -144,46 +146,38 @@ export default function MarketDetailScreen() {
             <View className="gap-4">
               <View className="gap-1.5">
                 <Text className="text-xs font-medium text-zinc-400">Nome</Text>
-                <TextInput
+                <Input
                   value={editName}
                   onChangeText={setEditName}
                   placeholder="Nome do mercado"
-                  placeholderTextColor="#52525b"
-                  className="rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 text-sm text-white"
                 />
               </View>
 
               <View className="gap-1.5">
                 <Text className="text-xs font-medium text-zinc-400">Endereço</Text>
-                <TextInput
+                <Input
                   value={editAddress}
                   onChangeText={setEditAddress}
                   placeholder="Ex: Av. Brasil, 1200 · Centro"
-                  placeholderTextColor="#52525b"
-                  className="rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 text-sm text-white"
                 />
               </View>
 
               <View className="gap-1.5">
                 <Text className="text-xs font-medium text-zinc-400">CNPJ</Text>
-                <TextInput
+                <Input
                   value={editCnpj}
                   onChangeText={setEditCnpj}
                   placeholder="00.000.000/0000-00"
-                  placeholderTextColor="#52525b"
                   keyboardType="numeric"
-                  className="rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 font-mono text-sm text-white"
+                  className="font-mono"
                 />
               </View>
 
-              <Pressable
-                onPress={saveEdit}
-                className="mt-2 rounded-2xl bg-[#34d399] py-4"
-              >
-                <Text className="text-center text-base font-semibold text-[#052e1f]">
+              <Button variant="accent" onPress={saveEdit} className="mt-2">
+                <Text className="text-base font-semibold">
                   Salvar
                 </Text>
-              </Pressable>
+              </Button>
             </View>
           </View>
         </View>

@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { like } from 'drizzle-orm';
 import CurrencyInput from 'react-native-currency-input';
 
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Text } from '@/components/ui/text';
@@ -56,14 +57,12 @@ function ProductInput({ value, onChangeText }: { value: string; onChangeText: (v
 
   return (
     <View className="relative">
-      <TextInput
+      <Input
         value={value}
         onChangeText={onChangeText}
         onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
         onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
         placeholder="Ex: Arroz 5kg"
-        placeholderTextColor="#52525b"
-        className="rounded-[14px] border border-zinc-800 bg-[#0f0f11] px-3.5 py-2.5 text-sm text-white"
       />
       {showSuggestions && (
         <View className="absolute left-0 right-0 top-[42px] z-50 rounded-xl border border-zinc-800 bg-[#1c1c1f] shadow-lg">
@@ -150,13 +149,11 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
             Mercado
           </Label>
           <View className="relative">
-            <TextInput
+            <Input
               value={storeName}
               onChangeText={setStoreName}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
               placeholder="Ex: Supermercado X"
-              placeholderTextColor="#52525b"
-              className="rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 text-sm text-white"
               aria-labelledby="store-name"
             />
             {showSuggestions && (
@@ -182,85 +179,80 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
 
         {/* Items */}
         {items.map((item, index) => (
-          <View key={index} className="gap-3 rounded-2xl border border-zinc-800 bg-[#18181b] p-3.5">
-            <View className="flex-row items-center justify-between">
-              <Text className="text-xs font-medium text-zinc-500">Item {index + 1}</Text>
-              {items.length > 1 && (
-                <Pressable onPress={() => handleRemoveItem(index)}>
-                  <Text className="text-xs text-red-400">Remover</Text>
-                </Pressable>
-              )}
-            </View>
+          <Card key={index} className="p-3.5">
+            <CardContent className="gap-3">
+              <View className="flex-row items-center justify-between">
+                <Text className="text-xs font-medium text-zinc-500">Item {index + 1}</Text>
+                {items.length > 1 && (
+                  <Pressable onPress={() => handleRemoveItem(index)}>
+                    <Text className="text-xs text-red-400">Remover</Text>
+                  </Pressable>
+                )}
+              </View>
 
-            <View className="gap-1.5">
-              <Text className="text-xs text-zinc-400">Produto</Text>
-              <ProductInput
-                value={item.name}
-                onChangeText={(v) => handleUpdateItem(index, 'name', v)}
-              />
-            </View>
-
-            <View className="flex-row gap-3">
-              <View className="flex-1 gap-1.5">
-                <Text className="text-xs text-zinc-400">Preço (R$)</Text>
-                <CurrencyInput
-                  value={item.price}
-                  onChangeValue={(v) => handleUpdateItem(index, 'price', v as any)}
-                  prefix="R$ "
-                  delimiter="."
-                  separator=","
-                  precision={2}
-                  minValue={0}
-                  placeholder="R$ 0,00"
-                  placeholderTextColor="#52525b"
-                  style={{
-                    borderRadius: 14,
-                    borderWidth: 1,
-                    borderColor: '#27272a',
-                    backgroundColor: '#0f0f11',
-                    paddingHorizontal: 14,
-                    paddingVertical: 10,
-                    fontSize: 14,
-                    color: '#ffffff',
-                  }}
-                  keyboardType="numeric"
+              <View className="gap-1.5">
+                <Text className="text-xs text-zinc-400">Produto</Text>
+                <ProductInput
+                  value={item.name}
+                  onChangeText={(v) => handleUpdateItem(index, 'name', v)}
                 />
               </View>
-              <View className="w-20 gap-1.5">
-                <Text className="text-xs text-zinc-400">Qtde</Text>
-                <TextInput
-                  value={item.quantity}
-                  onChangeText={(v) => handleUpdateItem(index, 'quantity', v)}
-                  placeholder="1"
-                  placeholderTextColor="#52525b"
-                  keyboardType="numeric"
-                  className="rounded-[14px] border border-zinc-800 bg-[#0f0f11] px-3.5 py-2.5 text-sm text-white"
-                />
+
+              <View className="flex-row gap-3">
+                <View className="flex-1 gap-1.5">
+                  <Text className="text-xs text-zinc-400">Preço (R$)</Text>
+                  <CurrencyInput
+                    value={item.price}
+                    onChangeValue={(v) => handleUpdateItem(index, 'price', v as any)}
+                    prefix="R$ "
+                    delimiter="."
+                    separator=","
+                    precision={2}
+                    minValue={0}
+                    placeholder="R$ 0,00"
+                    placeholderTextColor="#52525b"
+                    style={{
+                      borderRadius: 14,
+                      borderWidth: 1,
+                      borderColor: '#27272a',
+                      backgroundColor: '#0f0f11',
+                      paddingHorizontal: 14,
+                      paddingVertical: 10,
+                      fontSize: 14,
+                      color: '#ffffff',
+                    }}
+                    keyboardType="numeric"
+                  />
+                </View>
+                <View className="w-20 gap-1.5">
+                  <Text className="text-xs text-zinc-400">Qtde</Text>
+                  <Input
+                    value={item.quantity}
+                    onChangeText={(v) => handleUpdateItem(index, 'quantity', v)}
+                    placeholder="1"
+                    keyboardType="numeric"
+                  />
+                </View>
               </View>
-            </View>
-          </View>
+            </CardContent>
+          </Card>
         ))}
 
         {/* Add item */}
-        <Pressable
-          onPress={handleAddItem}
-          className="rounded-2xl border border-dashed border-zinc-700 py-3"
-        >
-          <Text className="text-center text-sm text-zinc-400">+ Adicionar item</Text>
-        </Pressable>
+        <Button variant="outline" onPress={handleAddItem} className="border-dashed border-zinc-700">
+          <Text className="text-sm text-zinc-400">+ Adicionar item</Text>
+        </Button>
 
         {/* Submit */}
-        <Pressable
+        <Button
+          variant="accent"
           onPress={handleSubmit}
           disabled={!hasValidItems || isLoading}
-          className={`rounded-2xl py-4 ${hasValidItems && !isLoading ? 'bg-[#34d399]' : 'bg-zinc-800'}`}
         >
-          <Text
-            className={`text-center text-base font-semibold ${hasValidItems && !isLoading ? 'text-[#052e1f]' : 'text-zinc-500'}`}
-          >
+          <Text className="text-base font-semibold">
             {isLoading ? 'Salvando...' : 'Salvar'}
           </Text>
-        </Pressable>
+        </Button>
       </View>
     </ScrollView>
   );

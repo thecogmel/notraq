@@ -5,7 +5,7 @@ import { Platform, Pressable } from 'react-native';
 
 const buttonVariants = cva(
   cn(
-    'group shrink-0 flex-row items-center justify-center gap-2 rounded-md shadow-none',
+    'group shrink-0 flex-row items-center justify-center gap-2 rounded-2xl shadow-none',
     Platform.select({
       web: "focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive whitespace-nowrap outline-none transition-all focus-visible:ring-[3px] disabled:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
     })
@@ -17,6 +17,10 @@ const buttonVariants = cva(
           'bg-primary active:bg-primary/90 shadow-sm shadow-black/5',
           Platform.select({ web: 'hover:bg-primary/90' })
         ),
+        accent: cn(
+          'bg-[#34d399] active:bg-[#34d399]/90 rounded-2xl py-4',
+          Platform.select({ web: 'hover:bg-[#34d399]/90' })
+        ),
         destructive: cn(
           'bg-destructive active:bg-destructive/90 dark:bg-destructive/60 shadow-sm shadow-black/5',
           Platform.select({
@@ -24,9 +28,9 @@ const buttonVariants = cva(
           })
         ),
         outline: cn(
-          'border-border bg-background active:bg-accent dark:bg-input/30 dark:border-input dark:active:bg-input/50 border shadow-sm shadow-black/5',
+          'border-zinc-800 bg-[#18181b] active:bg-zinc-800 border',
           Platform.select({
-            web: 'hover:bg-accent dark:hover:bg-input/50',
+            web: 'hover:bg-zinc-800',
           })
         ),
         secondary: cn(
@@ -34,8 +38,8 @@ const buttonVariants = cva(
           Platform.select({ web: 'hover:bg-secondary/80' })
         ),
         ghost: cn(
-          'active:bg-accent dark:active:bg-accent/50',
-          Platform.select({ web: 'hover:bg-accent dark:hover:bg-accent/50' })
+          'active:bg-zinc-800',
+          Platform.select({ web: 'hover:bg-zinc-800' })
         ),
         link: '',
       },
@@ -62,6 +66,7 @@ const buttonTextVariants = cva(
     variants: {
       variant: {
         default: 'text-primary-foreground',
+        accent: 'text-[#052e1f]',
         destructive: 'text-white',
         outline: cn(
           'group-active:text-accent-foreground',

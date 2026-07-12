@@ -12,6 +12,8 @@ import {
 
 import { ManualEntryForm } from '@/components/ManualEntryForm';
 import { ScannerView } from '@/components/ScannerView';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { pickAndScanQr } from '@/services/image-scanner';
 import { createManualReceipt } from '@/services/nfce-parser';
@@ -230,24 +232,25 @@ export default function ScanModal() {
           </View>
 
           {/* Ver detalhes button */}
-          <Pressable
-            className="w-full rounded-2xl bg-[#34d399] px-6 py-4"
+          <Button
+            variant="accent"
+            className="w-full"
             onPress={() => router.replace(`/receipt/${successData.receiptId}` as never)}
           >
-            <Text className="text-center text-base font-semibold text-[#052e1f]">
+            <Text className="text-base font-semibold">
               Ver detalhes da nota
             </Text>
-          </Pressable>
+          </Button>
 
           {/* Scan again */}
-          <Pressable onPress={() => { setScanState('idle'); setMode('choose'); }}>
+          <Button variant="ghost" onPress={() => { setScanState('idle'); setMode('choose'); }}>
             <Text className="text-sm text-zinc-400">Escanear outra</Text>
-          </Pressable>
+          </Button>
 
           {/* Close */}
-          <Pressable onPress={() => router.back()}>
+          <Button variant="ghost" onPress={() => router.back()}>
             <Text className="text-sm text-zinc-600">Fechar</Text>
-          </Pressable>
+          </Button>
         </View>
       </View>
     );
@@ -272,45 +275,51 @@ export default function ScanModal() {
         {/* Options */}
         <View className="flex-1 justify-center gap-3 px-5">
           <Pressable onPress={() => setMode('camera')}>
-            <View className="flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
-                <Camera size={24} color="#34d399" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-white">Escanear QR Code</Text>
-                <Text className="text-sm text-zinc-400">
-                  Aponte a câmera para o QR do cupom fiscal
-                </Text>
-              </View>
-            </View>
+            <Card className="p-4">
+              <CardContent className="flex-row items-center gap-4">
+                <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
+                  <Camera size={24} color="#34d399" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-white">Escanear QR Code</Text>
+                  <Text className="text-sm text-zinc-400">
+                    Aponte a câmera para o QR do cupom fiscal
+                  </Text>
+                </View>
+              </CardContent>
+            </Card>
           </Pressable>
 
           <Pressable onPress={handlePickImage}>
-            <View className="flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
-                <Image size={24} color="#34d399" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-white">Importar Foto</Text>
-                <Text className="text-sm text-zinc-400">
-                  Selecione uma foto do cupom na galeria
-                </Text>
-              </View>
-            </View>
+            <Card className="p-4">
+              <CardContent className="flex-row items-center gap-4">
+                <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
+                  <Image size={24} color="#34d399" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-white">Importar Foto</Text>
+                  <Text className="text-sm text-zinc-400">
+                    Selecione uma foto do cupom na galeria
+                  </Text>
+                </View>
+              </CardContent>
+            </Card>
           </Pressable>
 
           <Pressable onPress={() => setMode('manual')}>
-            <View className="flex-row items-center gap-4 rounded-2xl border border-zinc-800 bg-zinc-900 p-4">
-              <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
-                <Keyboard size={24} color="#34d399" />
-              </View>
-              <View className="flex-1">
-                <Text className="text-base font-semibold text-white">Digitar Manualmente</Text>
-                <Text className="text-sm text-zinc-400">
-                  Adicione produtos e preços na mão
-                </Text>
-              </View>
-            </View>
+            <Card className="p-4">
+              <CardContent className="flex-row items-center gap-4">
+                <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#34d399]/10">
+                  <Keyboard size={24} color="#34d399" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-base font-semibold text-white">Digitar Manualmente</Text>
+                  <Text className="text-sm text-zinc-400">
+                    Adicione produtos e preços na mão
+                  </Text>
+                </View>
+              </CardContent>
+            </Card>
           </Pressable>
         </View>
       </View>
