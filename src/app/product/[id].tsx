@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 import { PriceChangeAlert } from '@/components/PriceChangeAlert';
+import { PriceChart } from '@/components/PriceChart';
 import { Separator } from '@/components/ui/separator';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
@@ -72,17 +73,7 @@ export default function ProductDetailScreen() {
           </View>
         )}
 
-        {/* TODO: PriceChart component com react-native-gifted-charts */}
-        {history.length >= 2 && (
-          <View className="items-center rounded-lg bg-muted p-4">
-            <Text className="text-sm text-muted-foreground">
-              📈 Gráfico de evolução (em breve)
-            </Text>
-            <Text className="mt-1 text-xs text-muted-foreground">
-              {history.length} registros de preço
-            </Text>
-          </View>
-        )}
+        {history.length >= 2 && <PriceChart data={history} />}
 
         <Separator />
 
