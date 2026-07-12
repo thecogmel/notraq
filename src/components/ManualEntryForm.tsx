@@ -32,8 +32,12 @@ interface StoreSuggestion {
 function ProductInput({ value, onChangeText }: { value: string; onChangeText: (v: string) => void }) {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedValue, setSelectedValue] = useState('');
 
   useEffect(() => {
+    // Don't search if user just selected this value
+    if (value === selectedValue) return;
+
     if (value.trim().length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -53,15 +57,16 @@ function ProductInput({ value, onChangeText }: { value: string; onChangeText: (v
 
     const timeout = setTimeout(search, 200);
     return () => clearTimeout(timeout);
-  }, [value]);
+  }, [value, selectedValue]);
 
   return (
     <View className="relative">
       <Input
         value={value}
-        onChangeText={onChangeText}
-        onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-        onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+        onChangeText={(v) => {
+          setSelectedValue('');
+          onChangeText(v);
+        }}
         placeholder="Ex: Arroz 5kg"
       />
       {showSuggestions && (
@@ -70,6 +75,7 @@ function ProductInput({ value, onChangeText }: { value: string; onChangeText: (v
             <Pressable
               key={name}
               onPress={() => {
+                setSelectedValue(name);
                 onChangeText(name);
                 setShowSuggestions(false);
               }}
@@ -88,10 +94,14 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   const [storeName, setStoreName] = useState('');
   const [suggestions, setSuggestions] = useState<StoreSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedStore, setSelectedStore] = useState('');
   const [items, setItems] = useState<ManualItem[]>([{ name: '', price: null, quantity: '1' }]);
 
   // Search stores as user types
   useEffect(() => {
+    // Don't search if user just selected this value
+    if (storeName === selectedStore) return;
+
     if (storeName.trim().length < 2) {
       setSuggestions([]);
       setShowSuggestions(false);
@@ -110,9 +120,10 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
 
     const timeout = setTimeout(search, 200);
     return () => clearTimeout(timeout);
-  }, [storeName]);
+  }, [storeName, selectedStore]);
 
   const selectStore = (name: string) => {
+    setSelectedStore(name);
     setStoreName(name);
     setShowSuggestions(false);
   };
@@ -151,8 +162,10 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
           <View className="relative">
             <Input
               value={storeName}
-              onChangeText={setStoreName}
-              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              onChangeText={(v) => {
+                setSelectedStore('');
+                setStoreName(v);
+              }}
               placeholder="Ex: Supermercado X"
               aria-labelledby="store-name"
             />
