@@ -21,7 +21,7 @@ export const EXTRACTION_SCRIPT = `
 
     // Razão social / nome
     var razaoMatch = text.match(/(?:Raz[aã]o\\s*Social|Empresa|Emitente)[:\\s]*([^\\n]+)/i);
-    if (razaoMatch) storeName = razaoMatch[1].trim();
+    if (razaoMatch) storeName = razaoMatch[1].trim().replace(/^[:\\s]+/, '');
 
     if (!storeName) {
       // Fallback: buscar texto bold no topo
@@ -165,7 +165,7 @@ export function parseWebViewResult(
   const purchaseDate = parseBrDate(raw.purchaseDate);
 
   return {
-    storeName: cleanText(raw.storeName),
+    storeName: cleanStoreName(raw.storeName),
     storeCnpj: raw.storeCnpj,
     storeAddress: cleanText(raw.storeAddress),
     items: raw.items.map((item) => ({
@@ -228,5 +228,11 @@ function cleanText(text: string): string {
     .replace(/<[^>]+>/g, '')
     .replace(/&[^;]+;/g, ' ')
     .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function cleanStoreName(text: string): string {
+  return cleanText(text)
+    .replace(/^(?:RAZ[ÃA]O\s*SOCIAL|EMPRESA|EMITENTE)[:\s]*/i, '')
     .trim();
 }

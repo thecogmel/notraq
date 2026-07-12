@@ -57,13 +57,23 @@ async function upsertProduct(name: string, unit: string): Promise<number> {
   // Case-insensitive match
   const allProducts = await db.select().from(products);
   const match = allProducts.find((p) => p.name.toUpperCase() === upper);
-  if (match) return match.id;
+  if (match) {
+    // Update name to Title Case if currently all upper
+    const titleCase = toTitleCase(normalized);
+    if (match.name !== titleCase && match.name === match.name.toUpperCase()) {
+      await db.update(products).set({ name: titleCase }).where(eq(products.id, match.id));
+    }
+    return match.id;
+  }
 
   // Save as Title Case
-  const titleCase = normalized
-    .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
-
+  const titleCase = toTitleCase(normalized);
   const [product] = await db.insert(products).values({ name: titleCase, unit }).returning();
   return product.id;
+}
+
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
