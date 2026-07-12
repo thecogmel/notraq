@@ -3,10 +3,6 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    font-family: 'Capriola_400Regular';
-  }
-
   :root {
     --background: 240 6% 4%;
     --foreground: 0 0% 98%;
