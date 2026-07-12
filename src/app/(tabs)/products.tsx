@@ -9,6 +9,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { priceEntries, products } from '@/db/schema';
+import { formatBRL } from '@/lib/utils';
 import { calculatePriceChange } from '@/services/price-analyzer';
 import type { PriceChange } from '@/types';
 
@@ -299,7 +300,7 @@ function ProductRow({ item }: { item: ProductWithPrice }) {
         {/* Right: Price + Variation (fixed width) */}
         <View className="w-[74px] items-end">
           <Text className="font-mono text-sm font-semibold text-white">
-            R$ {item.lastPrice.toFixed(2).replace('.', ',')}
+            {formatBRL(item.lastPrice)}
           </Text>
           {item.priceChange && direction !== 'stable' ? (
             <Text className={`mt-0.5 text-[11.5px] font-semibold ${variationColor}`}>

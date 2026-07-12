@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 
 import { db } from '@/db/client';
 import { priceEntries, products, receipts, stores } from '@/db/schema';
+import { toTitleCase } from '@/lib/utils';
 import type { NfceReceipt } from '@/types';
 
 export async function ingestReceipt(data: NfceReceipt): Promise<number> {
@@ -87,10 +88,4 @@ async function upsertProduct(name: string, unit: string): Promise<number> {
   const titleCase = toTitleCase(normalized);
   const [product] = await db.insert(products).values({ name: titleCase, unit }).returning();
   return product.id;
-}
-
-function toTitleCase(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/\b\w/g, (c) => c.toUpperCase());
 }

@@ -10,14 +10,9 @@ import { PriceChart } from '@/components/PriceChart';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { priceEntries, products, stores } from '@/db/schema';
+import { formatBRL, getNameColor } from '@/lib/utils';
 import { calculatePriceChange } from '@/services/price-analyzer';
 import type { PriceChange } from '@/types';
-
-function getStoreColor(name: string): string {
-  const colors = ['#34d399', '#60a5fa', '#f472b6', '#fb923c', '#a78bfa', '#facc15'];
-  const idx = name.charCodeAt(0) % colors.length;
-  return colors[idx];
-}
 
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -124,7 +119,7 @@ export default function ProductDetailScreen() {
         {/* Current price + variation */}
         <View className="mt-4 flex-row items-baseline gap-2.5">
           <Text className="font-mono text-[34px] font-semibold tracking-tighter text-white">
-            R$ {currentPrice.toFixed(2).replace('.', ',')}
+            {formatBRL(currentPrice)}
           </Text>
           {change && direction !== 'stable' && (
             <Text className="text-[15px] font-semibold" style={{ color: trendColor }}>
@@ -145,13 +140,13 @@ export default function ProductDetailScreen() {
           <View className="flex-1 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
             <Text className="text-[11px] text-zinc-500">Preço atual</Text>
             <Text className="mt-1 font-mono text-lg font-semibold tracking-tight text-white">
-              R$ {currentPrice.toFixed(2).replace('.', ',')}
+              {formatBRL(currentPrice)}
             </Text>
           </View>
           <View className="flex-1 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
             <Text className="text-[11px] text-zinc-500">Menor preço</Text>
             <Text className="mt-1 font-mono text-lg font-semibold tracking-tight text-[#34d399]">
-              R$ {minPrice.toFixed(2).replace('.', ',')}
+              {formatBRL(minPrice)}
             </Text>
           </View>
         </View>
@@ -159,13 +154,13 @@ export default function ProductDetailScreen() {
           <View className="flex-1 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
             <Text className="text-[11px] text-zinc-500">Maior preço</Text>
             <Text className="mt-1 font-mono text-lg font-semibold tracking-tight text-[#f87171]">
-              R$ {maxPrice.toFixed(2).replace('.', ',')}
+              {formatBRL(maxPrice)}
             </Text>
           </View>
           <View className="flex-1 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
             <Text className="text-[11px] text-zinc-500">Preço médio</Text>
             <Text className="mt-1 font-mono text-lg font-semibold tracking-tight text-[#e4e4e7]">
-              R$ {avgPrice.toFixed(2).replace('.', ',')}
+              {formatBRL(avgPrice)}
             </Text>
           </View>
         </View>
@@ -178,7 +173,7 @@ export default function ProductDetailScreen() {
             </Text>
             <View className="gap-2">
               {storeEntries.map((entry, idx) => {
-                const color = getStoreColor(entry.storeName);
+                const color = getNameColor(entry.storeName);
                 const isLowest = entry.value === lowestPrice;
                 return (
                   <View
@@ -214,7 +209,7 @@ export default function ProductDetailScreen() {
                         </Text>
                       )}
                       <Text className="font-mono text-sm font-semibold tracking-tight text-white">
-                        R$ {entry.value.toFixed(2).replace('.', ',')}
+                        {formatBRL(entry.value)}
                       </Text>
                     </View>
                   </View>

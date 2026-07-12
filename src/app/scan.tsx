@@ -16,6 +16,7 @@ import { Toast } from '@/components/Toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
+import { formatBRL } from '@/lib/utils';
 import { pickAndScanQr } from '@/services/image-scanner';
 import { createManualReceipt } from '@/services/nfce-parser';
 import { isNfceUrl, parseNfceUrl, buildConsultaUrl } from '@/services/nfce-url';
@@ -236,7 +237,7 @@ export default function ScanModal() {
               <View>
                 <Text className="text-xs text-zinc-500">Total da compra</Text>
                 <Text className="mt-1 font-mono text-2xl font-semibold text-white">
-                  R$ {successData.totalAmount.toFixed(2).replace('.', ',')}
+                  {formatBRL(successData.totalAmount)}
                 </Text>
               </View>
               <View className="items-end">

@@ -1,20 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Modal, Pressable, ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { desc, eq } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar, ChevronLeft, Clock, Package, Trash2, TrendingDown, TrendingUp } from 'lucide-react-native';
 
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { priceEntries, products, receipts, stores } from '@/db/schema';
-
-function getStoreColor(name: string): string {
-  const colors = ['#34d399', '#60a5fa', '#f472b6', '#fb923c', '#a78bfa', '#facc15'];
-  const idx = name.charCodeAt(0) % colors.length;
-  return colors[idx];
-}
+import { formatBRL, getNameColor } from '@/lib/utils';
 
 interface ReceiptItem {
   name: string;
@@ -103,7 +99,7 @@ export default function ReceiptDetailScreen() {
     loadReceipt();
   }, [loadReceipt]);
 
-  const storeColor = getStoreColor(storeName || 'D');
+  const storeColor = getNameColor(storeName || 'D');
 
   return (
     <ScrollView className="flex-1 bg-[#09090b]">
@@ -128,30 +124,15 @@ export default function ReceiptDetailScreen() {
         </View>
 
         {/* Delete confirmation modal */}
-        <Modal visible={confirmDelete} transparent animationType="fade">
-          <View className="flex-1 items-center justify-center bg-black/60 px-8">
-            <View className="w-full rounded-2xl border border-zinc-800 bg-[#18181b] p-5">
-              <Text className="text-lg font-semibold text-white">Excluir nota?</Text>
-              <Text className="mt-2 text-sm text-zinc-400">
-                Todos os registros de preço desta compra serão removidos. Esta ação não pode ser desfeita.
-              </Text>
-              <View className="mt-5 flex-row gap-3">
-                <Pressable
-                  onPress={() => setConfirmDelete(false)}
-                  className="flex-1 rounded-xl border border-zinc-700 py-3"
-                >
-                  <Text className="text-center text-sm font-medium text-zinc-300">Cancelar</Text>
-                </Pressable>
-                <Pressable
-                  onPress={deleteReceipt}
-                  className="flex-1 rounded-xl bg-red-500/90 py-3"
-                >
-                  <Text className="text-center text-sm font-semibold text-white">Excluir</Text>
-                </Pressable>
-              </View>
-            </View>
-          </View>
-        </Modal>
+        <ConfirmDialog
+          visible={confirmDelete}
+          title="Excluir nota?"
+          message="Todos os registros de preço desta compra serão removidos. Esta ação não pode ser desfeita."
+          destructive
+          confirmLabel="Excluir"
+          onConfirm={deleteReceipt}
+          onCancel={() => setConfirmDelete(false)}
+        />
 
         {/* Store avatar + name + address */}
         <View className="flex-row items-center gap-3.5 px-1">
@@ -196,7 +177,7 @@ export default function ReceiptDetailScreen() {
           <View>
             <Text className="text-xs text-zinc-500">Total da compra</Text>
             <Text className="mt-1 font-mono text-[30px] font-semibold tracking-tighter text-white">
-              R$ {total.toFixed(2).replace('.', ',')}
+              {formatBRL(total)}
             </Text>
           </View>
         </View>
@@ -219,7 +200,7 @@ export default function ReceiptDetailScreen() {
                   {item.name}
                 </Text>
                 <Text className="mt-0.5 font-mono text-[11.5px] text-zinc-500">
-                  {item.quantity} × R$ {item.unitPrice.toFixed(2).replace('.', ',')}
+                  {item.quantity} × {formatBRL(item.unitPrice)}
                 </Text>
               </View>
 
@@ -238,7 +219,7 @@ export default function ReceiptDetailScreen() {
                   </View>
                 )}
                 <Text className="min-w-[74px] text-right font-mono text-sm font-semibold tracking-tight text-white">
-                  R$ {item.total.toFixed(2).replace('.', ',')}
+                  {formatBRL(item.total)}
                 </Text>
               </View>
             </View>

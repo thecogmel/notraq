@@ -3,6 +3,7 @@ import { Link } from 'expo-router';
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
+import { formatBRL } from '@/lib/utils';
 import type { PriceChange } from '@/types';
 
 import { PriceChangeAlert } from './PriceChangeAlert';
@@ -25,7 +26,7 @@ export function ProductCard({ productId, name, lastPrice, priceChange }: Props) 
                 {name}
               </Text>
               <Text className="mt-0.5 text-lg font-bold text-foreground">
-                R$ {lastPrice.toFixed(2).replace('.', ',')}
+                {formatBRL(lastPrice)}
               </Text>
             </View>
             {priceChange && priceChange.direction !== 'stable' && (

@@ -8,13 +8,7 @@ import { EmptyState } from '@/components/EmptyState';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { receipts, stores } from '@/db/schema';
-
-// Generate a consistent color for store icon bg
-function getStoreColor(name: string): string {
-  const colors = ['#34d399', '#60a5fa', '#f472b6', '#fb923c', '#a78bfa', '#facc15'];
-  const idx = name.charCodeAt(0) % colors.length;
-  return colors[idx];
-}
+import { formatBRL, getNameColor } from '@/lib/utils';
 
 interface StoreSummary {
   id: number;
@@ -81,7 +75,7 @@ export default function MarketsScreen() {
         contentContainerStyle={{ paddingBottom: 100 }}
         ItemSeparatorComponent={() => <View className="h-3" />}
         renderItem={({ item }) => {
-          const color = getStoreColor(item.name);
+          const color = getNameColor(item.name);
           return (
             <Pressable onPress={() => router.push(`/market/${item.id}` as never)}>
               <View className="flex-row items-center rounded-[18px] border border-zinc-800 bg-zinc-900 p-4">
@@ -107,7 +101,7 @@ export default function MarketsScreen() {
                     {item.receiptCount} {item.receiptCount === 1 ? 'nota' : 'notas'}
                   </Text>
                   <Text className="mt-0.5 font-mono text-sm font-semibold text-white">
-                    R$ {item.totalSpent.toFixed(2).replace('.', ',')}
+                    {formatBRL(item.totalSpent)}
                   </Text>
                 </View>
               </View>

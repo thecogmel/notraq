@@ -7,16 +7,12 @@ import { ptBR } from 'date-fns/locale';
 import { ChevronLeft, ChevronRight, Pencil, Receipt, Store, Trash2, X } from 'lucide-react-native';
 
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ConfirmDialog';
 import { Input } from '@/components/ui/input';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { priceEntries, products, receipts, stores } from '@/db/schema';
-
-function getStoreColor(name: string): string {
-  const colors = ['#34d399', '#60a5fa', '#f472b6', '#fb923c', '#a78bfa', '#facc15'];
-  const idx = name.charCodeAt(0) % colors.length;
-  return colors[idx];
-}
+import { formatBRL, getNameColor } from '@/lib/utils';
 
 interface MarketData {
   name: string;
@@ -134,7 +130,7 @@ export default function MarketDetailScreen() {
     loadData();
   };
 
-  const color = getStoreColor(data.name);
+  const color = getNameColor(data.name);
 
   return (
     <>
@@ -224,30 +220,15 @@ export default function MarketDetailScreen() {
           </View>
 
           {/* Delete confirmation modal */}
-          <Modal visible={confirmDelete} transparent animationType="fade">
-            <View className="flex-1 items-center justify-center bg-black/60 px-8">
-              <View className="w-full rounded-2xl border border-zinc-800 bg-[#18181b] p-5">
-                <Text className="text-lg font-semibold text-white">Excluir mercado?</Text>
-                <Text className="mt-2 text-sm text-zinc-400">
-                  Todas as notas e registros de preço deste mercado serão removidos permanentemente.
-                </Text>
-                <View className="mt-5 flex-row gap-3">
-                  <Pressable
-                    onPress={() => setConfirmDelete(false)}
-                    className="flex-1 rounded-xl border border-zinc-700 py-3"
-                  >
-                    <Text className="text-center text-sm font-medium text-zinc-300">Cancelar</Text>
-                  </Pressable>
-                  <Pressable
-                    onPress={deleteMarket}
-                    className="flex-1 rounded-xl bg-red-500/90 py-3"
-                  >
-                    <Text className="text-center text-sm font-semibold text-white">Excluir</Text>
-                  </Pressable>
-                </View>
-              </View>
-            </View>
-          </Modal>
+          <ConfirmDialog
+            visible={confirmDelete}
+            title="Excluir mercado?"
+            message="Todas as notas e registros de preço deste mercado serão removidos permanentemente."
+            destructive
+            confirmLabel="Excluir"
+            onConfirm={deleteMarket}
+            onCancel={() => setConfirmDelete(false)}
+          />
 
           {/* Store icon + name + address + CNPJ */}
           <View className="flex-row items-center gap-3.5">
@@ -283,7 +264,7 @@ export default function MarketDetailScreen() {
           <View className="flex-1 rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3">
             <Text className="text-[11px] text-zinc-500">Total gasto</Text>
             <Text className="mt-1 font-mono text-xl font-semibold tracking-tight text-white">
-              R$ {data.totalSpent.toFixed(2).replace('.', ',')}
+              {formatBRL(data.totalSpent)}
             </Text>
           </View>
         </View>
@@ -343,7 +324,7 @@ export default function MarketDetailScreen() {
                   {/* Total + chevron */}
                   <View className="flex-row items-center gap-1.5">
                     <Text className="font-mono text-sm font-semibold tracking-tight text-zinc-200">
-                      R$ {r.total.toFixed(2).replace('.', ',')}
+                      {formatBRL(r.total)}
                     </Text>
                     <ChevronRight size={16} color="#52525b" />
                   </View>

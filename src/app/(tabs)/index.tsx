@@ -8,6 +8,7 @@ import { ScanLine, TrendingDown, TrendingUp } from 'lucide-react-native';
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
 import { priceEntries, products, receipts, stores } from '@/db/schema';
+import { formatBRL } from '@/lib/utils';
 import { calculatePriceChange } from '@/services/price-analyzer';
 import type { PriceChange } from '@/types';
 
@@ -196,7 +197,7 @@ export default function HomeScreen() {
                     {alert.changePercent.toFixed(1)}%
                   </Text>
                   <Text className="text-xs text-zinc-500">
-                    R$ {alert.currentPrice.toFixed(2).replace('.', ',')}
+                    {formatBRL(alert.currentPrice)}
                   </Text>
                 </View>
               </Pressable>
@@ -244,7 +245,7 @@ export default function HomeScreen() {
 
                   {/* Total */}
                   <Text className="font-mono text-sm font-semibold text-white">
-                    R$ {receipt.total.toFixed(2).replace('.', ',')}
+                    {formatBRL(receipt.total)}
                   </Text>
                 </Pressable>
               ))}
