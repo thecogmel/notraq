@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, router } from 'expo-router';
 import { desc, eq } from 'drizzle-orm';
 import { Search } from 'lucide-react-native';
 import Svg, { Polyline } from 'react-native-svg';
@@ -279,32 +279,34 @@ function ProductRow({ item }: { item: ProductWithPrice }) {
   const variationPrefix = direction === 'up' ? '+' : direction === 'down' ? '' : '';
 
   return (
-    <View className="flex-row items-center gap-3 rounded-2xl border border-zinc-800 bg-[#18181b] px-3.5 py-3">
-      {/* Left: Name + Unit */}
-      <View className="flex-1 shrink">
-        <Text className="text-sm font-semibold text-white" numberOfLines={1}>
-          {item.name}
-        </Text>
-        {item.unit ? (
-          <Text className="mt-0.5 text-[11.5px] text-zinc-500">{item.unit}</Text>
-        ) : null}
-      </View>
-
-      {/* Middle: Sparkline */}
-      <Sparkline prices={item.recentPrices} direction={direction} />
-
-      {/* Right: Price + Variation (fixed width) */}
-      <View className="w-[74px] items-end">
-        <Text className="font-mono text-sm font-semibold text-white">
-          R$ {item.lastPrice.toFixed(2).replace('.', ',')}
-        </Text>
-        {item.priceChange && direction !== 'stable' ? (
-          <Text className={`mt-0.5 text-[11.5px] font-semibold ${variationColor}`}>
-            {variationPrefix}
-            {changePercent.toFixed(1).replace('.', ',')}%
+    <Pressable onPress={() => router.push(`/product/${item.id}` as never)}>
+      <View className="flex-row items-center gap-3 rounded-2xl border border-zinc-800 bg-[#18181b] px-3.5 py-3">
+        {/* Left: Name + Unit */}
+        <View className="flex-1 shrink">
+          <Text className="text-sm font-semibold text-white" numberOfLines={1}>
+            {item.name}
           </Text>
-        ) : null}
+          {item.unit ? (
+            <Text className="mt-0.5 text-[11.5px] text-zinc-500">{item.unit}</Text>
+          ) : null}
+        </View>
+
+        {/* Middle: Sparkline */}
+        <Sparkline prices={item.recentPrices} direction={direction} />
+
+        {/* Right: Price + Variation (fixed width) */}
+        <View className="w-[74px] items-end">
+          <Text className="font-mono text-sm font-semibold text-white">
+            R$ {item.lastPrice.toFixed(2).replace('.', ',')}
+          </Text>
+          {item.priceChange && direction !== 'stable' ? (
+            <Text className={`mt-0.5 text-[11.5px] font-semibold ${variationColor}`}>
+              {variationPrefix}
+              {changePercent.toFixed(1).replace('.', ',')}%
+            </Text>
+          ) : null}
+        </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
