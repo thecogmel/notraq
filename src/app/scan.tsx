@@ -128,7 +128,7 @@ export default function ScanModal() {
 
   const handleManualSubmit = async (data: {
     storeName: string;
-    items: { name: string; price: string; quantity: string }[];
+    items: { name: string; price: number | null; quantity: string }[];
   }) => {
     setProcessing(true);
     setScanState('loading');
@@ -139,7 +139,7 @@ export default function ScanModal() {
           name: item.name,
           unit: 'UN',
           quantity: parseFloat(item.quantity.replace(',', '.')) || 1,
-          unitPrice: parseFloat(item.price.replace(',', '.')) || 0,
+          unitPrice: item.price ?? 0,
         })),
       });
 

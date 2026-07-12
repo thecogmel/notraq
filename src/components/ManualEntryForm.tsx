@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, TextInput, View } from 'react-native';
 import { like } from 'drizzle-orm';
+import CurrencyInput from 'react-native-currency-input';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,7 +12,7 @@ import { products, stores } from '@/db/schema';
 
 interface ManualItem {
   name: string;
-  price: string;
+  price: number | null;
   quantity: string;
 }
 
@@ -88,7 +89,7 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   const [storeName, setStoreName] = useState('');
   const [suggestions, setSuggestions] = useState<StoreSuggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [items, setItems] = useState<ManualItem[]>([{ name: '', price: '', quantity: '1' }]);
+  const [items, setItems] = useState<ManualItem[]>([{ name: '', price: null, quantity: '1' }]);
 
   // Search stores as user types
   useEffect(() => {
@@ -118,10 +119,10 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   };
 
   const handleAddItem = () => {
-    setItems([...items, { name: '', price: '', quantity: '1' }]);
+    setItems([...items, { name: '', price: null, quantity: '1' }]);
   };
 
-  const handleUpdateItem = (index: number, field: keyof ManualItem, value: string) => {
+  const handleUpdateItem = (index: number, field: keyof ManualItem, value: string | number | null) => {
     const updated = [...items];
     updated[index] = { ...updated[index], [field]: value };
     setItems(updated);
@@ -133,12 +134,12 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   };
 
   const handleSubmit = () => {
-    const validItems = items.filter((item) => item.name.trim() && item.price.trim());
+    const validItems = items.filter((item) => item.name.trim() && item.price && item.price > 0);
     if (validItems.length === 0) return;
     onSubmit({ storeName: storeName.trim(), items: validItems });
   };
 
-  const hasValidItems = items.some((item) => item.name.trim() && item.price.trim());
+  const hasValidItems = items.some((item) => item.name.trim() && item.price && item.price > 0);
 
   return (
     <ScrollView className="flex-1 bg-[#09090b]" keyboardShouldPersistTaps="handled">
@@ -202,13 +203,27 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
             <View className="flex-row gap-3">
               <View className="flex-1 gap-1.5">
                 <Text className="text-xs text-zinc-400">Preço (R$)</Text>
-                <TextInput
+                <CurrencyInput
                   value={item.price}
-                  onChangeText={(v) => handleUpdateItem(index, 'price', v)}
-                  placeholder="0,00"
+                  onChangeValue={(v) => handleUpdateItem(index, 'price', v as any)}
+                  prefix="R$ "
+                  delimiter="."
+                  separator=","
+                  precision={2}
+                  minValue={0}
+                  placeholder="R$ 0,00"
                   placeholderTextColor="#52525b"
-                  keyboardType="decimal-pad"
-                  className="rounded-[14px] border border-zinc-800 bg-[#0f0f11] px-3.5 py-2.5 text-sm text-white"
+                  style={{
+                    borderRadius: 14,
+                    borderWidth: 1,
+                    borderColor: '#27272a',
+                    backgroundColor: '#0f0f11',
+                    paddingHorizontal: 14,
+                    paddingVertical: 10,
+                    fontSize: 14,
+                    color: '#ffffff',
+                  }}
+                  keyboardType="numeric"
                 />
               </View>
               <View className="w-20 gap-1.5">
