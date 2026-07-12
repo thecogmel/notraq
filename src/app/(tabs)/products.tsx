@@ -198,8 +198,8 @@ export default function ProductsScreen() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        className="mb-2.5 -mx-4 grow-0"
-        contentContainerClassName="gap-2 px-4"
+        className="mb-2.5 -mx-4"
+        contentContainerClassName="gap-2 px-4 py-1"
       >
         {FILTERS.map((f) => {
           const active = filter === f.key;
@@ -207,7 +207,7 @@ export default function ProductsScreen() {
             <Pressable
               key={f.key}
               onPress={() => setFilter(f.key)}
-              className={`self-start rounded-full border px-3.5 py-[7px] ${
+              className={`rounded-full border px-3.5 py-2 ${
                 active
                   ? 'border-transparent bg-price-down'
                   : 'border-zinc-800 bg-[#18181b]'
