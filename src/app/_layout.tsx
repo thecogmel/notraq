@@ -1,14 +1,26 @@
 import '../../global.css';
 
+import { useEffect } from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { Stack } from 'expo-router';
+import { useFonts, Capriola_400Regular } from '@expo-google-fonts/capriola';
+import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 
 import { Text } from '@/components/ui/text';
 import { useDatabaseMigrations } from '@/db/client';
 
+SplashScreen.preventAutoHideAsync();
+
 function AppContent() {
   const { success, error } = useDatabaseMigrations();
+  const [fontsLoaded] = useFonts({ Capriola_400Regular });
+
+  useEffect(() => {
+    if (fontsLoaded && success) {
+      SplashScreen.hideAsync();
+    }
+  }, [fontsLoaded, success]);
 
   if (error) {
     return (
@@ -20,11 +32,10 @@ function AppContent() {
     );
   }
 
-  if (!success) {
+  if (!success || !fontsLoaded) {
     return (
       <View className="flex-1 items-center justify-center bg-background">
         <ActivityIndicator size="large" color="#34d399" />
-        <Text className="mt-2 text-muted-foreground">Inicializando...</Text>
       </View>
     );
   }
