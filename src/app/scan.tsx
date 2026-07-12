@@ -17,7 +17,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
 import { pickAndScanQr } from '@/services/image-scanner';
 import { createManualReceipt } from '@/services/nfce-parser';
-import { isNfceUrl, parseNfceUrl } from '@/services/nfce-url';
+import { isNfceUrl, parseNfceUrl, buildConsultaUrl } from '@/services/nfce-url';
 import { ingestReceipt } from '@/services/receipt-ingestion';
 import { useAppStore } from '@/store/app-store';
 
@@ -99,7 +99,7 @@ export default function ScanModal() {
 
     // Navegar para WebView de consulta
     setPendingUrl(url);
-    const consultaUrl = info.url.startsWith('http') ? info.url : `${info.sefazUrl}/portalDFE/NFCe/ConsultaNFCe.aspx?p=${info.accessKey}`;
+    const consultaUrl = buildConsultaUrl(info);
     router.push({
       pathname: '/nfce-webview',
       params: { url: consultaUrl, accessKey: info.accessKey },
