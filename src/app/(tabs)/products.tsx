@@ -195,35 +195,37 @@ export default function ProductsScreen() {
       </View>
 
       {/* Filter Chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        className="mb-2.5 -mx-4"
-        contentContainerClassName="gap-2 px-4 py-1"
-      >
-        {FILTERS.map((f) => {
-          const active = filter === f.key;
-          return (
-            <Pressable
-              key={f.key}
-              onPress={() => setFilter(f.key)}
-              className={`rounded-full border px-3.5 py-2 ${
-                active
-                  ? 'border-transparent bg-price-down'
-                  : 'border-zinc-800 bg-[#18181b]'
-              }`}
-            >
-              <Text
-                className={`text-[13px] font-medium ${
-                  active ? 'text-zinc-950' : 'text-zinc-400'
+      <View className="mb-2.5 -mx-4 h-10">
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerClassName="gap-2 px-4 items-center"
+          className="flex-1"
+        >
+          {FILTERS.map((f) => {
+            const active = filter === f.key;
+            return (
+              <Pressable
+                key={f.key}
+                onPress={() => setFilter(f.key)}
+                className={`rounded-full border px-3.5 py-1.5 ${
+                  active
+                    ? 'border-transparent bg-price-down'
+                    : 'border-zinc-800 bg-[#18181b]'
                 }`}
               >
-                {f.label}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </ScrollView>
+                <Text
+                  className={`text-[13px] font-medium leading-5 ${
+                    active ? 'text-zinc-950' : 'text-zinc-400'
+                  }`}
+                >
+                  {f.label}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {/* Sort Row */}
       <View className="mb-3 flex-row items-center gap-2">
