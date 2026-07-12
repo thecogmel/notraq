@@ -26,8 +26,9 @@ interface ReceiptItem {
 }
 
 export default function ReceiptDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const receiptId = Number(id);
+  const isFromImport = from === 'import';
 
   const [storeName, setStoreName] = useState('');
   const [storeAddress, setStoreAddress] = useState('');
@@ -244,15 +245,17 @@ export default function ReceiptDetailScreen() {
           ))}
         </View>
 
-        {/* Concluir */}
-        <Pressable
-          onPress={() => router.replace('/(tabs)' as never)}
-          className="mt-4 rounded-2xl bg-[#34d399] py-4"
-        >
-          <Text className="text-center text-base font-semibold text-[#052e1f]">
-            Concluir
-          </Text>
-        </Pressable>
+        {/* Concluir - só aparece quando veio de importação */}
+        {isFromImport && (
+          <Pressable
+            onPress={() => router.replace('/(tabs)' as never)}
+            className="mt-4 rounded-2xl bg-[#34d399] py-4"
+          >
+            <Text className="text-center text-base font-semibold text-[#052e1f]">
+              Concluir
+            </Text>
+          </Pressable>
+        )}
       </View>
     </ScrollView>
   );

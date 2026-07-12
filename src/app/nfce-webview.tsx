@@ -51,7 +51,7 @@ export default function NfceWebViewScreen() {
       }
 
       const receiptId = await ingestReceipt(receipt);
-      router.replace(`/receipt/${receiptId}` as never);
+      router.replace(`/receipt/${receiptId}?from=import` as never);
     } catch (e) {
       setExtracting(false);
       setError('Falha ao processar dados da nota.');

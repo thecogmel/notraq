@@ -252,7 +252,7 @@ export default function ScanModal() {
           <Button
             variant="accent"
             className="w-full"
-            onPress={() => router.replace(`/receipt/${successData.receiptId}` as never)}
+            onPress={() => router.replace(`/receipt/${successData.receiptId}?from=import` as never)}
           >
             <Text className="text-base font-semibold">
               Ver detalhes da nota
