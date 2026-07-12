@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Modal, Pressable, ScrollView, TextInput, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { desc, eq, sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Receipt, Store } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Pencil, Receipt, Store, X } from 'lucide-react-native';
 
 import { Text } from '@/components/ui/text';
 import { db } from '@/db/client';
@@ -31,6 +31,10 @@ export default function MarketDetailScreen() {
   const storeId = Number(id);
 
   const [data, setData] = useState<MarketData | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editAddress, setEditAddress] = useState('');
+  const [editCnpj, setEditCnpj] = useState('');
 
   const loadData = useCallback(async () => {
     const [store] = await db.select().from(stores).where(eq(stores.id, storeId)).limit(1);
@@ -97,32 +101,125 @@ export default function MarketDetailScreen() {
 
   if (!data) return null;
 
+  const openEdit = () => {
+    setEditName(data.name);
+    setEditAddress(data.address);
+    setEditCnpj(data.cnpj);
+    setEditing(true);
+  };
+
+  const saveEdit = async () => {
+    await db
+      .update(stores)
+      .set({
+        name: editName.trim() || data.name,
+        address: editAddress.trim() || null,
+        cnpj: editCnpj.trim() || null,
+      })
+      .where(eq(stores.id, storeId));
+    setEditing(false);
+    loadData();
+  };
+
   const color = getStoreColor(data.name);
 
   return (
-    <ScrollView className="flex-1 bg-[#09090b]">
-      <View className="px-5 pb-8 pt-14">
-        {/* Header */}
-        <View className="flex-row items-center gap-2.5 pb-3.5">
-          <Pressable
-            onPress={() => router.back()}
-            className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-[#18181b]"
-          >
-            <ChevronLeft size={20} color="#e4e4e7" />
-          </Pressable>
-          <Text className="text-[17px] font-semibold text-white">Mercado</Text>
-        </View>
+    <>
+      {/* Edit Modal */}
+      <Modal visible={editing} transparent animationType="slide">
+        <View className="flex-1 justify-end bg-black/60">
+          <View className="rounded-t-3xl bg-[#09090b] px-5 pb-10 pt-5">
+            {/* Modal header */}
+            <View className="flex-row items-center justify-between pb-5">
+              <Text className="text-lg font-semibold text-white">Editar mercado</Text>
+              <Pressable
+                onPress={() => setEditing(false)}
+                className="h-8 w-8 items-center justify-center rounded-full bg-zinc-800"
+              >
+                <X size={16} color="#a1a1aa" />
+              </Pressable>
+            </View>
 
-        {/* Store icon + name + address + CNPJ */}
-        <View className="flex-row items-center gap-3.5">
-          <View
-            className="h-[54px] w-[54px] items-center justify-center rounded-2xl"
-            style={{ backgroundColor: `${color}20` }}
-          >
-            <Store size={26} color={color} />
+            {/* Fields */}
+            <View className="gap-4">
+              <View className="gap-1.5">
+                <Text className="text-xs font-medium text-zinc-400">Nome</Text>
+                <TextInput
+                  value={editName}
+                  onChangeText={setEditName}
+                  placeholder="Nome do mercado"
+                  placeholderTextColor="#52525b"
+                  className="rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 text-sm text-white"
+                />
+              </View>
+
+              <View className="gap-1.5">
+                <Text className="text-xs font-medium text-zinc-400">Endereço</Text>
+                <TextInput
+                  value={editAddress}
+                  onChangeText={setEditAddress}
+                  placeholder="Ex: Av. Brasil, 1200 · Centro"
+                  placeholderTextColor="#52525b"
+                  className="rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 text-sm text-white"
+                />
+              </View>
+
+              <View className="gap-1.5">
+                <Text className="text-xs font-medium text-zinc-400">CNPJ</Text>
+                <TextInput
+                  value={editCnpj}
+                  onChangeText={setEditCnpj}
+                  placeholder="00.000.000/0000-00"
+                  placeholderTextColor="#52525b"
+                  keyboardType="numeric"
+                  className="rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 font-mono text-sm text-white"
+                />
+              </View>
+
+              <Pressable
+                onPress={saveEdit}
+                className="mt-2 rounded-2xl bg-[#34d399] py-4"
+              >
+                <Text className="text-center text-base font-semibold text-[#052e1f]">
+                  Salvar
+                </Text>
+              </Pressable>
+            </View>
           </View>
-          <View className="flex-1">
-            <Text className="text-[19px] font-semibold tracking-tight text-white">
+        </View>
+      </Modal>
+
+      <ScrollView className="flex-1 bg-[#09090b]">
+        <View className="px-5 pb-8 pt-14">
+          {/* Header */}
+          <View className="flex-row items-center justify-between pb-3.5">
+            <View className="flex-row items-center gap-2.5">
+              <Pressable
+                onPress={() => router.back()}
+                className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-[#18181b]"
+              >
+                <ChevronLeft size={20} color="#e4e4e7" />
+              </Pressable>
+              <Text className="text-[17px] font-semibold text-white">Mercado</Text>
+            </View>
+            <Pressable
+              onPress={openEdit}
+              className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-[#18181b]"
+            >
+              <Pencil size={16} color="#a1a1aa" />
+            </Pressable>
+          </View>
+
+          {/* Store icon + name + address + CNPJ */}
+          <View className="flex-row items-center gap-3.5">
+            <View
+              className="h-[54px] w-[54px] items-center justify-center rounded-2xl"
+              style={{ backgroundColor: `${color}20` }}
+            >
+              <Store size={26} color={color} />
+            </View>
+            <View className="flex-1">
+              <Text className="text-[19px] font-semibold tracking-tight text-white">
               {data.name}
             </Text>
             {data.address ? (
@@ -218,5 +315,6 @@ export default function MarketDetailScreen() {
         )}
       </View>
     </ScrollView>
+    </>
   );
 }
