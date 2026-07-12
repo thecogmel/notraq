@@ -44,6 +44,7 @@ function AppContent() {
       />
       <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="receipt/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="market/[id]" options={{ headerShown: false }} />
     </Stack>
   );
 }

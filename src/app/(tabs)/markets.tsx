@@ -83,7 +83,7 @@ export default function MarketsScreen() {
         renderItem={({ item }) => {
           const color = getStoreColor(item.name);
           return (
-            <Pressable onPress={() => router.push(`/receipt/${item.id}` as never)}>
+            <Pressable onPress={() => router.push(`/market/${item.id}` as never)}>
               <View className="flex-row items-center rounded-[18px] border border-zinc-800 bg-zinc-900 p-4">
                 {/* Store icon */}
                 <View
