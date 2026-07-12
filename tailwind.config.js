@@ -60,7 +60,7 @@ module.exports = {
         hairline: hairlineWidth(),
       },
       fontFamily: {
-        sans: ['Capriola_400Regular', 'system-ui', 'sans-serif'],
+        sans: ['Capriola_400Regular'],
         mono: ['ui-monospace', 'monospace'],
       },
       keyframes: {

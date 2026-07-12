@@ -9,7 +9,7 @@ function Input({
     <TextInput
       placeholderTextColor="#52525b"
       className={cn(
-        'flex w-full min-w-0 flex-row items-center rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 text-sm leading-5 text-white',
+        'flex w-full min-w-0 flex-row items-center rounded-[14px] border border-zinc-800 bg-[#18181b] px-3.5 py-3 font-sans text-sm leading-5 text-white',
         props.editable === false &&
           cn(
             'opacity-50',
