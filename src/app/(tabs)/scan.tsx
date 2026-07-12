@@ -6,6 +6,7 @@ import { ManualEntryForm } from '@/components/ManualEntryForm';
 import { ScannerView } from '@/components/ScannerView';
 import { Button } from '@/components/ui/button';
 import { Text } from '@/components/ui/text';
+import { pickAndScanQr } from '@/services/image-scanner';
 import { createManualReceipt } from '@/services/nfce-parser';
 import { isNfceUrl, parseNfceUrl } from '@/services/nfce-url';
 import { ingestReceipt } from '@/services/receipt-ingestion';
@@ -15,7 +16,7 @@ export default function ScanScreen() {
   const [mode, setMode] = useState<'scan' | 'manual'>('scan');
   const { isProcessing, setProcessing, setError, setPendingUrl } = useAppStore();
 
-  const handleScan = (url: string) => {
+  const handleQrData = (url: string) => {
     if (isProcessing) return;
 
     if (!isNfceUrl(url)) {
@@ -30,13 +31,31 @@ export default function ScanScreen() {
     }
 
     // TODO: Abrir WebView para consulta com captcha
-    // Por enquanto, salva URL pendente e alerta o usuário
     setPendingUrl(url);
     Alert.alert(
       'NFC-e detectada',
       `Chave: ...${info.accessKey.slice(-8)}\nEstado: ${info.uf}\n\nA consulta via WebView será implementada em breve. Use a entrada manual por enquanto.`,
       [{ text: 'OK', onPress: () => setMode('manual') }]
     );
+  };
+
+  const handlePickImage = async () => {
+    try {
+      setProcessing(true);
+      const qrData = await pickAndScanQr();
+
+      if (!qrData) {
+        Alert.alert('QR não encontrado', 'Não foi possível detectar um QR code na imagem selecionada.');
+        return;
+      }
+
+      handleQrData(qrData);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Erro ao processar imagem';
+      Alert.alert('Erro', msg);
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleManualSubmit = async (data: {
@@ -87,7 +106,14 @@ export default function ScanScreen() {
       </View>
 
       {mode === 'scan' ? (
-        <ScannerView onScan={handleScan} enabled={!isProcessing} />
+        <View className="flex-1">
+          <ScannerView onScan={handleQrData} enabled={!isProcessing} />
+          <View className="border-t border-border p-3">
+            <Button variant="outline" onPress={handlePickImage} disabled={isProcessing}>
+              <Text>📷 Importar da Galeria</Text>
+            </Button>
+          </View>
+        </View>
       ) : (
         <ManualEntryForm onSubmit={handleManualSubmit} isLoading={isProcessing} />
       )}
