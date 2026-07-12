@@ -42,6 +42,10 @@ function AppContent() {
         name="scan"
         options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
       />
+      <Stack.Screen
+        name="nfce-webview"
+        options={{ headerShown: false, presentation: 'fullScreenModal' }}
+      />
       <Stack.Screen name="product/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="receipt/[id]" options={{ headerShown: false }} />
       <Stack.Screen name="market/[id]" options={{ headerShown: false }} />

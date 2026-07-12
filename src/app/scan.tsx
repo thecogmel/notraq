@@ -97,12 +97,13 @@ export default function ScanModal() {
       return;
     }
 
+    // Navegar para WebView de consulta
     setPendingUrl(url);
-    Alert.alert(
-      'NFC-e detectada!',
-      `Chave: ...${info.accessKey.slice(-8)}\nEstado: ${info.uf}\n\nConsulta via WebView em breve. Use entrada manual por enquanto.`,
-      [{ text: 'Adicionar Manual', onPress: () => setMode('manual') }]
-    );
+    const consultaUrl = info.url.startsWith('http') ? info.url : `${info.sefazUrl}/portalDFE/NFCe/ConsultaNFCe.aspx?p=${info.accessKey}`;
+    router.push({
+      pathname: '/nfce-webview',
+      params: { url: consultaUrl, accessKey: info.accessKey },
+    } as never);
   };
 
   const handlePickImage = async () => {
