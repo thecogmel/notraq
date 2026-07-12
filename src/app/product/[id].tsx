@@ -87,14 +87,15 @@ export default function ProductDetailScreen() {
   return (
     <ScrollView className="flex-1 bg-[#0a0a0b]">
       <View className="gap-5 px-5 pb-8 pt-14">
-        {/* Back button */}
-        <View className="flex-row items-center">
+        {/* Header */}
+        <View className="flex-row items-center gap-3">
           <Pressable
             onPress={() => router.back()}
             className="h-[38px] w-[38px] items-center justify-center rounded-xl border border-zinc-800 bg-zinc-900"
           >
-            <ChevronLeft size={20} color="#a1a1aa" />
+            <ChevronLeft size={20} color="#e4e4e7" />
           </Pressable>
+          <Text className="text-lg font-semibold text-white">Produto</Text>
         </View>
 
         {/* Product name + unit */}
