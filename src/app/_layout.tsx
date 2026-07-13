@@ -46,12 +46,15 @@ function AppContent() {
         headerStyle: { backgroundColor: '#09090b' },
         headerTintColor: '#fafafa',
         contentStyle: { backgroundColor: '#09090b' },
-      }}
-    >
+      }}>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="scan"
-        options={{ headerShown: false, presentation: 'fullScreenModal', animation: 'slide_from_bottom' }}
+        options={{
+          headerShown: false,
+          presentation: 'fullScreenModal',
+          animation: 'slide_from_bottom',
+        }}
       />
       <Stack.Screen
         name="nfce-webview"
