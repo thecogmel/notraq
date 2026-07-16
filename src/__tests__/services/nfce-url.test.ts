@@ -55,8 +55,13 @@ describe('isNfceUrl', () => {
 });
 
 describe('buildConsultaUrl', () => {
-  it('builds consultation URL for RN', () => {
-    const info = { url: 'original', accessKey: '24260705248755000395651080000362871324393145', uf: '24', sefazUrl: 'https://nfce.sefaz.rn.gov.br' };
+  it('uses original URL when it is a valid SEFAZ URL', () => {
+    const info = { url: 'https://nfce.sefaz.rn.gov.br/portalDFE/NFCe/mDadosNFCe.aspx?p=24260708030363001668651240000689261006537646|2|1|2|hash', accessKey: '24260708030363001668651240000689261006537646', uf: '24', sefazUrl: 'https://nfce.sefaz.rn.gov.br' };
+    expect(buildConsultaUrl(info)).toBe(info.url);
+  });
+
+  it('builds consultation URL when original is not HTTP', () => {
+    const info = { url: '24260705248755000395651080000362871324393145', accessKey: '24260705248755000395651080000362871324393145', uf: '24', sefazUrl: 'https://nfce.sefaz.rn.gov.br' };
     expect(buildConsultaUrl(info)).toBe('https://nfce.sefaz.rn.gov.br/portalDFE/NFCe/ConsultaNFCe.aspx?p=24260705248755000395651080000362871324393145');
   });
 

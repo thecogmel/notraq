@@ -87,16 +87,20 @@ export function parseNfceUrl(qrcodeData: string): NfceUrlInfo | null {
 
 /**
  * Monta a URL de consulta pública da NFC-e para o WebView.
- * Sempre usa o portal de consulta pública (que tem captcha mas funciona).
- * A URL do QR code muitas vezes não responde diretamente.
+ * Se a URL do QR já é uma URL de consulta válida da SEFAZ, usa ela diretamente.
+ * Caso contrário, monta a URL de consulta pública com a chave de acesso.
  */
 export function buildConsultaUrl(info: NfceUrlInfo): string {
-  // Usar a consulta pública da SEFAZ do estado com a chave preenchida
+  // Se a URL original é uma URL HTTP da SEFAZ, usar direto (já tem os params corretos)
+  if (info.url.startsWith('http') && info.url.match(/sefaz|set\.\w+\.gov/i)) {
+    return info.url;
+  }
+
+  // Fallback: montar URL de consulta pública
   if (info.sefazUrl) {
     return `${info.sefazUrl}/portalDFE/NFCe/ConsultaNFCe.aspx?p=${info.accessKey}`;
   }
 
-  // Fallback: URL original do QR
   return info.url;
 }
 
