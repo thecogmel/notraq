@@ -15,6 +15,7 @@ interface ManualItem {
   name: string;
   price: number | null;
   quantity: string;
+  unit: string;
 }
 
 interface Props {
@@ -24,7 +25,7 @@ interface Props {
 
 export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   const [storeName, setStoreName] = useState('');
-  const [items, setItems] = useState<ManualItem[]>([{ name: '', price: null, quantity: '1' }]);
+  const [items, setItems] = useState<ManualItem[]>([{ name: '', price: null, quantity: '1', unit: 'UN' }]);
 
   const searchStores = useCallback(async (query: string) => {
     const results = await db
@@ -45,7 +46,7 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   }, []);
 
   const handleAddItem = () => {
-    setItems([...items, { name: '', price: null, quantity: '1' }]);
+    setItems([...items, { name: '', price: null, quantity: '1', unit: 'UN' }]);
   };
 
   const handleUpdateItem = (index: number, field: keyof ManualItem, value: string | number | null) => {
@@ -132,7 +133,7 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
                     keyboardType="numeric"
                   />
                 </View>
-                <View className="w-20 gap-1.5">
+                <View className="w-16 gap-1.5">
                   <Text className="text-xs text-zinc-400">Qtde</Text>
                   <Input
                     value={item.quantity}
@@ -140,6 +141,24 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
                     placeholder="1"
                     keyboardType="numeric"
                   />
+                </View>
+                <View className="w-14 gap-1.5">
+                  <Text className="text-xs text-zinc-400">Un.</Text>
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    <View className="flex-row gap-1">
+                      {['UN', 'KG', 'LT', 'ML', 'PC'].map((u) => (
+                        <Pressable
+                          key={u}
+                          onPress={() => handleUpdateItem(index, 'unit', u)}
+                          className={`rounded-lg px-2 py-2 ${item.unit === u ? 'bg-[#34d399]' : 'bg-zinc-800'}`}
+                        >
+                          <Text className={`text-[10px] font-medium ${item.unit === u ? 'text-[#052e1f]' : 'text-zinc-400'}`}>
+                            {u}
+                          </Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </ScrollView>
                 </View>
               </View>
             </CardContent>
