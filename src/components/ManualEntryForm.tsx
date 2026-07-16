@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { like } from 'drizzle-orm';
 import CurrencyInput from 'react-native-currency-input';
 
