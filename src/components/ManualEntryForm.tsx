@@ -142,23 +142,19 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
                     keyboardType="numeric"
                   />
                 </View>
-                <View className="w-14 gap-1.5">
+                <View className="w-16 gap-1.5">
                   <Text className="text-xs text-zinc-400">Un.</Text>
-                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                    <View className="flex-row gap-1">
-                      {['UN', 'KG', 'LT', 'ML', 'PC'].map((u) => (
-                        <Pressable
-                          key={u}
-                          onPress={() => handleUpdateItem(index, 'unit', u)}
-                          className={`rounded-lg px-2 py-2 ${item.unit === u ? 'bg-[#34d399]' : 'bg-zinc-800'}`}
-                        >
-                          <Text className={`text-[10px] font-medium ${item.unit === u ? 'text-[#052e1f]' : 'text-zinc-400'}`}>
-                            {u}
-                          </Text>
-                        </Pressable>
-                      ))}
-                    </View>
-                  </ScrollView>
+                  <Pressable
+                    onPress={() => {
+                      const units = ['UN', 'KG', 'LT', 'ML', 'PC', 'CX', 'DZ', 'GR'];
+                      const currentIdx = units.indexOf(item.unit);
+                      const nextIdx = (currentIdx + 1) % units.length;
+                      handleUpdateItem(index, 'unit', units[nextIdx]);
+                    }}
+                    className="items-center rounded-[14px] border border-zinc-800 bg-[#18181b] px-2 py-3"
+                  >
+                    <Text className="text-sm font-medium text-white">{item.unit}</Text>
+                  </Pressable>
                 </View>
               </View>
             </CardContent>
