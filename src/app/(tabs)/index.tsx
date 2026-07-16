@@ -14,9 +14,9 @@ import type { PriceChange } from '@/types';
 
 function getGreeting(): string {
   const hour = new Date().getHours();
-  if (hour < 12) return 'Bom dia,';
-  if (hour < 18) return 'Boa tarde,';
-  return 'Boa noite,';
+  if (hour < 12) return 'Bom dia';
+  if (hour < 18) return 'Boa tarde';
+  return 'Boa noite';
 }
 
 interface RecentReceipt {
@@ -108,15 +108,19 @@ export default function HomeScreen() {
         <View className="flex-row items-center justify-between">
           <View>
             <Text className="text-sm text-zinc-500">{getGreeting()}</Text>
-            <Text className="text-2xl font-bold text-white">Erick</Text>
           </View>
           <Pressable onPress={() => router.push('/scan')}>
             <LinearGradient
               colors={['#34d399', '#10b981']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={{ width: 50, height: 50, borderRadius: 17, alignItems: 'center', justifyContent: 'center' }}
-            >
+              style={{
+                width: 50,
+                height: 50,
+                borderRadius: 17,
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
               <ScanLine color="#000" size={22} strokeWidth={2.5} />
             </LinearGradient>
           </Pressable>
@@ -131,9 +135,7 @@ export default function HomeScreen() {
             <Text className="text-xs text-zinc-500">Produtos</Text>
           </View>
           <View className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
-            <Text className="font-mono text-2xl font-semibold text-white">
-              {data.totalStores}
-            </Text>
+            <Text className="font-mono text-2xl font-semibold text-white">{data.totalStores}</Text>
             <Text className="text-xs text-zinc-500">Mercados</Text>
           </View>
           <View className="flex-1 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
@@ -158,17 +160,16 @@ export default function HomeScreen() {
               <Pressable
                 key={alert.productId}
                 onPress={() => router.push(`/product/${alert.productId}` as never)}
-                className="flex-row items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3"
-              >
+                className="flex-row items-center gap-3 rounded-2xl border border-zinc-800 bg-zinc-900 p-3">
                 {/* Icon */}
                 <View
                   className="items-center justify-center rounded-xl"
                   style={{
                     width: 42,
                     height: 42,
-                    backgroundColor: alert.direction === 'up' ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)',
-                  }}
-                >
+                    backgroundColor:
+                      alert.direction === 'up' ? 'rgba(248,113,113,0.15)' : 'rgba(52,211,153,0.15)',
+                  }}>
                   {alert.direction === 'up' ? (
                     <TrendingUp color="#f87171" size={20} />
                   ) : (
@@ -191,14 +192,11 @@ export default function HomeScreen() {
                   <Text
                     className={`text-sm font-semibold ${
                       alert.direction === 'up' ? 'text-price-up' : 'text-price-down'
-                    }`}
-                  >
+                    }`}>
                     {alert.direction === 'up' ? '+' : ''}
                     {alert.changePercent.toFixed(1)}%
                   </Text>
-                  <Text className="text-xs text-zinc-500">
-                    {formatBRL(alert.currentPrice)}
-                  </Text>
+                  <Text className="text-xs text-zinc-500">{formatBRL(alert.currentPrice)}</Text>
                 </View>
               </Pressable>
             ))}
@@ -217,13 +215,11 @@ export default function HomeScreen() {
                   onPress={() => router.push(`/receipt/${receipt.id}` as never)}
                   className={`flex-row items-center gap-3 p-3 ${
                     index < data.recentReceipts.length - 1 ? 'border-b border-zinc-800' : ''
-                  }`}
-                >
+                  }`}>
                   {/* Avatar initial */}
                   <View
                     className="items-center justify-center rounded-xl bg-zinc-800"
-                    style={{ width: 40, height: 40 }}
-                  >
+                    style={{ width: 40, height: 40 }}>
                     <Text className="text-sm font-semibold text-zinc-300">
                       {receipt.storeInitial}
                     </Text>
