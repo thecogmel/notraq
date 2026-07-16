@@ -28,7 +28,18 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   const [items, setItems] = useState<ManualItem[]>([{ name: '', price: null, quantity: '1', unit: 'UN' }]);
   const [unitModalIndex, setUnitModalIndex] = useState<number | null>(null);
 
-  const UNITS = ['UN', 'KG', 'LT', 'ML', 'PC', 'CX', 'DZ', 'GR', 'MT', 'L'];
+  const UNITS = [
+    { key: 'UN', label: 'UN - Unidade' },
+    { key: 'KG', label: 'KG - Quilograma' },
+    { key: 'G', label: 'G - Grama' },
+    { key: 'LT', label: 'LT - Litro' },
+    { key: 'ML', label: 'ML - Mililitro' },
+    { key: 'PC', label: 'PC - Pacote' },
+    { key: 'CX', label: 'CX - Caixa' },
+    { key: 'DZ', label: 'DZ - Dúzia' },
+    { key: 'MT', label: 'MT - Metro' },
+    { key: 'FD', label: 'FD - Fardo' },
+  ];
 
   const searchStores = useCallback(async (query: string) => {
     const results = await db
@@ -87,17 +98,17 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
               <View className="gap-1">
                 {UNITS.map((u) => (
                   <Pressable
-                    key={u}
+                    key={u.key}
                     onPress={() => {
                       if (unitModalIndex !== null) {
-                        handleUpdateItem(unitModalIndex, 'unit', u);
+                        handleUpdateItem(unitModalIndex, 'unit', u.key);
                       }
                       setUnitModalIndex(null);
                     }}
-                    className={`rounded-xl px-4 py-3 ${unitModalIndex !== null && items[unitModalIndex]?.unit === u ? 'bg-[#34d399]' : 'bg-zinc-900'}`}
+                    className={`rounded-xl px-4 py-3 ${unitModalIndex !== null && items[unitModalIndex]?.unit === u.key ? 'bg-[#34d399]' : 'bg-zinc-900'}`}
                   >
-                    <Text className={`text-sm font-medium ${unitModalIndex !== null && items[unitModalIndex]?.unit === u ? 'text-[#052e1f]' : 'text-white'}`}>
-                      {u}
+                    <Text className={`text-sm font-medium ${unitModalIndex !== null && items[unitModalIndex]?.unit === u.key ? 'text-[#052e1f]' : 'text-white'}`}>
+                      {u.label}
                     </Text>
                   </Pressable>
                 ))}
