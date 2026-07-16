@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { like } from 'drizzle-orm';
 import CurrencyInput from 'react-native-currency-input';
 
@@ -26,6 +26,9 @@ interface Props {
 export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   const [storeName, setStoreName] = useState('');
   const [items, setItems] = useState<ManualItem[]>([{ name: '', price: null, quantity: '1', unit: 'UN' }]);
+  const [unitModalIndex, setUnitModalIndex] = useState<number | null>(null);
+
+  const UNITS = ['UN', 'KG', 'LT', 'ML', 'PC', 'CX', 'DZ', 'GR', 'MT', 'L'];
 
   const searchStores = useCallback(async (query: string) => {
     const results = await db
@@ -69,7 +72,42 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
   const hasValidItems = items.some((item) => item.name.trim() && item.price && item.price > 0);
 
   return (
-    <ScrollView className="flex-1 bg-[#09090b]" keyboardShouldPersistTaps="handled">
+    <>
+      {/* Unit picker modal */}
+      <Modal visible={unitModalIndex !== null} transparent animationType="slide">
+        <View className="flex-1 justify-end bg-black/60">
+          <View className="rounded-t-3xl bg-[#09090b] px-5 pb-10 pt-5">
+            <View className="flex-row items-center justify-between pb-4">
+              <Text className="text-lg font-semibold text-white">Unidade de medida</Text>
+              <Pressable onPress={() => setUnitModalIndex(null)} className="h-8 w-8 items-center justify-center rounded-full bg-zinc-800">
+                <Text className="text-xs text-zinc-400">✕</Text>
+              </Pressable>
+            </View>
+            <ScrollView className="max-h-64">
+              <View className="gap-1">
+                {UNITS.map((u) => (
+                  <Pressable
+                    key={u}
+                    onPress={() => {
+                      if (unitModalIndex !== null) {
+                        handleUpdateItem(unitModalIndex, 'unit', u);
+                      }
+                      setUnitModalIndex(null);
+                    }}
+                    className={`rounded-xl px-4 py-3 ${unitModalIndex !== null && items[unitModalIndex]?.unit === u ? 'bg-[#34d399]' : 'bg-zinc-900'}`}
+                  >
+                    <Text className={`text-sm font-medium ${unitModalIndex !== null && items[unitModalIndex]?.unit === u ? 'text-[#052e1f]' : 'text-white'}`}>
+                      {u}
+                    </Text>
+                  </Pressable>
+                ))}
+              </View>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      <ScrollView className="flex-1 bg-[#09090b]" keyboardShouldPersistTaps="handled">
       <View className="gap-5 p-4">
         {/* Store name with autocomplete */}
         <View className="z-20 gap-1.5">
@@ -145,12 +183,7 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
                 <View className="w-16 gap-1.5">
                   <Text className="text-xs text-zinc-400">Un.</Text>
                   <Pressable
-                    onPress={() => {
-                      const units = ['UN', 'KG', 'LT', 'ML', 'PC', 'CX', 'DZ', 'GR'];
-                      const currentIdx = units.indexOf(item.unit);
-                      const nextIdx = (currentIdx + 1) % units.length;
-                      handleUpdateItem(index, 'unit', units[nextIdx]);
-                    }}
+                    onPress={() => setUnitModalIndex(index)}
                     className="items-center rounded-[14px] border border-zinc-800 bg-[#18181b] px-2 py-3"
                   >
                     <Text className="text-sm font-medium text-white">{item.unit}</Text>
@@ -178,5 +211,6 @@ export function ManualEntryForm({ onSubmit, isLoading }: Props) {
         </Button>
       </View>
     </ScrollView>
+    </>
   );
 }
